@@ -40,6 +40,10 @@ def serve_proxy(proxy_port, server_port, server_host=DEFAULT_SERVER_HOST):
     proxy_socket.bind((PROXY_HOST, proxy_port))
     proxy_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     proxy_socket.listen(BACKLOG)
+    tcp_h2_describe._display.display(
+        f"Starting tcp-h2-describe proxy server on port {proxy_port}\n"
+        f"  Proxying server located at {server_host}:{server_port}"
+    )
 
     while True:
         client_socket, (ip_addr, port) = proxy_socket.accept()

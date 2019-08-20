@@ -28,6 +28,11 @@ def main():
         packages=("tcp_h2_describe",),
         zip_safe=True,
         install_requires=REQUIREMENTS,
+        entry_points={
+            "console_scripts": (
+                "tcp-h2-describe=tcp_h2_describe.__main__:main",
+            )
+        },
         classifiers=[
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.7",
