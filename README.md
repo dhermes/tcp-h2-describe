@@ -4,12 +4,15 @@
 
 > Python library and CLI for running an HTTP/2 proxy that describes each frame
 
-## Install
+## Development
 
-To run test and build tasks, install [`nox`][1]:
+To work on adding a feature or to run the tests, see the [DEVELOPMENT doc][1]
+for more information on how to get started.
 
-```
-python3 -m pip install --upgrade 'nox >= 2019.8.20'
-```
+## License
 
-[1]: https://nox.thea.codes
+`tcp-h2-describe` is made available under the Apache 2.0 License. For more
+details, see the [LICENSE][2].
+
+[1]: https://github.com/dhermes/tcp-h2-describe/blob/master/README.md
+[2]: https://github.com/dhermes/tcp-h2-describe/blob/master/LICENSE
