@@ -4,6 +4,55 @@
 
 > Python library and CLI for running an HTTP/2 proxy that describes each frame
 
+## Install
+
+```
+python3 -m pip install --upgrade tcp-h2-describe
+```
+
+## Usage
+
+For example, on a machine where there is a local HTTP/2 server running on
+port 50051:
+
+```
+$ tcp-h2-describe --server-port 50051
+Starting tcp-h2-describe proxy server on port 24909
+  Proxying server located at localhost:50051
+...
+$ # OR
+$ python -m tcp_h2_describe --server-port 50051
+Starting tcp-h2-describe proxy server on port 24909
+  Proxying server located at localhost:50051
+...
+```
+
+Options also exist to customize the port where the `tcp-h2-describe` proxy
+runs as well as the remote server that is being proxied:
+
+```
+$ python -m tcp_h2_describe --help
+usage: tcp-h2-describe [-h] [--proxy-port PROXY_PORT]
+                       [--server-host SERVER_HOST] [--server-port SERVER_PORT]
+
+Run `tcp-h2-describe` reverse proxy server. This will forward traffic to a
+proxy port along to an already running HTTP/2 server. For each HTTP/2 frame
+forwarded (either client->server or server->client) a description will be
+printed to the console explaining what each byte in the frame means.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --proxy-port PROXY_PORT
+                        The port that will be used for running the "describe"
+                        proxy. (default: 24909)
+  --server-host SERVER_HOST
+                        The hostname for the server that is being proxied.
+                        (default: None)
+  --server-port SERVER_PORT
+                        The port for the server that is being proxied.
+                        (default: 80)
+```
+
 ## Development
 
 To work on adding a feature or to run the tests, see the [DEVELOPMENT doc][1]

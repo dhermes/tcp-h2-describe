@@ -15,6 +15,16 @@ import argparse
 from tcp_h2_describe._serve import serve_proxy
 
 
+DESCRIPTION = """\
+Run `tcp-h2-describe` reverse proxy server.
+
+This will forward traffic to a proxy port along to an already running
+HTTP/2 server. For each HTTP/2 frame forwarded (either client->server or
+server->client) a description will be printed to the console explaining what
+each byte in the frame means.
+"""
+
+
 def get_args():
     """Get the command line arguments for ``tcp-h2-describe``.
 
@@ -25,10 +35,10 @@ def get_args():
        * The hostname for the server that is being proxied (or :data:`None` if
          not provided)
     """
-    description = "Run."
     parser = argparse.ArgumentParser(
-        description=description,
+        description=DESCRIPTION,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        prog="tcp-h2-describe",
     )
     parser.add_argument(
         "--proxy-port",
