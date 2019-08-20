@@ -53,6 +53,25 @@ optional arguments:
                         (default: 80)
 ```
 
+To use directly from Python code
+
+```python
+import tcp_h2_describe
+
+proxy_port = 13370
+server_port = 50051
+tcp_h2_describe.serve_proxy(proxy_port, server_port)
+
+# OR: Spawn a thread to avoid blocking
+import threading
+
+server_thread = threading.Thread(
+    target=tcp_h2_describe.serve_proxy,
+    args=(proxy_port, server_port),
+)
+server_thread.start()
+```
+
 ## Development
 
 To work on adding a feature or to run the tests, see the [DEVELOPMENT doc][1]
