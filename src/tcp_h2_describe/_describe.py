@@ -14,6 +14,10 @@
 import tcp_h2_describe._display
 
 
+HEADER = "=" * 60
+FOOTER = "-" * 60
+
+
 def describe(h2_frame, connection_description):
     """Describe an HTTP/2 frame.
 
@@ -24,5 +28,8 @@ def describe(h2_frame, connection_description):
             relationship for a socket pair.
     """
     # NOTE: For now this is a dummy implementation.
-    message = f"{connection_description}\n\nHTTP/2 frame: {h2_frame}"
+    message = (
+        f"{HEADER}\n{connection_description}\n\n"
+        f"HTTP/2 frame: {h2_frame}\n{FOOTER}"
+    )
     tcp_h2_describe._display.display(message)
