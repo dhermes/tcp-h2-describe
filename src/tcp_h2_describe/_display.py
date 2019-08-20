@@ -10,9 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pkg_resources
 
-from tcp_h2_describe._serve import serve_proxy
+def display(message):
+    """Display a message to the screen.
 
-
-__version__ = pkg_resources.get_distribution("tcp-h2-describe").version
+    This is a stub implementation, to centralize all calls to ``print()``.
+    """
+    print(message)
