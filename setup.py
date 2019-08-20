@@ -17,15 +17,32 @@ import setuptools
 
 VERSION = "0.0.2.dev1"
 REQUIREMENTS = ()
+DESCRIPTION = (
+    "Python library and CLI for running an HTTP/2 proxy that describes "
+    "each frame"
+)
+LONG_DESCRIPTION = open("README.md", "r", encoding="utf-8").read()
 
 
 def main():
     setuptools.setup(
         name="tcp-h2-describe",
         version=VERSION,
+        description=DESCRIPTION,
+        author="Danny Hermes",
+        author_email="daniel.j.hermes@gmail.com",
+        long_description=LONG_DESCRIPTION,
+        long_description_content_type="text/markdown",
         scripts=(),
-        package_dir={"": "src"},
+        url="https://github.com/dhermes/tcp-h2-describe",
+        project_urls={
+            "Issue Tracker": "https://github.com/dhermes/tcp-h2-describe"
+        },
+        keywords=["TCP", "HTTP/2", "Networking", "Proxy"],
         packages=("tcp_h2_describe",),
+        package_dir={"": "src"},
+        license="Apache 2.0",
+        platforms="Posix; macOS; Windows",
         zip_safe=True,
         install_requires=REQUIREMENTS,
         entry_points={
@@ -34,6 +51,8 @@ def main():
             )
         },
         classifiers=[
+            "License :: OSI Approved :: Apache Software License",
+            "Operating System :: OS Independent",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.7",
         ],
