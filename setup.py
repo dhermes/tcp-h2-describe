@@ -16,7 +16,7 @@ import setuptools
 
 
 VERSION = "0.0.2.dev1"
-REQUIREMENTS = ()
+REQUIREMENTS = ("hpack >= 3.0.0",)
 DESCRIPTION = (
     "Python library and CLI for running an HTTP/2 proxy that describes "
     "each frame"

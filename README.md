@@ -160,7 +160,13 @@ Frame Length = 11 (00 00 0b)
 Frame Type = HEADERS (01)
 Flags = END_STREAM:0x1 | END_HEADERS:0x4 (05)
 Stream Identifier = 1 (00 00 00 01)
-Frame Payload = b'\x82\x86A\x86\xa0\xe4\x1d\x13\x9d\t\x84'
+Headers =
+   ':method' -> 'GET'
+   ':scheme' -> 'http'
+   ':authority' -> 'localhost'
+   ':path' -> '/'
+Hexdump =
+   82 86 41 86 a0 e4 1d 13 9d 09 84
 ----------------------------------------
 ============================================================
 server(localhost:8080)->proxy->client(127.0.0.1:59600)
@@ -169,7 +175,15 @@ Frame Length = 34 (00 00 22)
 Frame Type = HEADERS (01)
 Flags = END_HEADERS:0x4 (04)
 Stream Identifier = 1 (00 00 00 01)
-Frame Payload = b'\x88v\x8e\x8ch1\x16\x9cK \xb6w-\x8c\x05p\x7f\\\x82u\xef_\x8b\x1du\xd0b\r&=LtA\xea'
+Headers =
+   ':status' -> '200'
+   'server' -> 'basic-h2-server/1.0'
+   'content-length' -> '78'
+   'content-type' -> 'application/json'
+Hexdump =
+   88 76 8e 8c 68 31 16 9c 4b 20 b6 77 2d 8c 05 70
+   7f 5c 82 75 ef 5f 8b 1d 75 d0 62 0d 26 3d 4c 74
+   41 ea
 ----------------------------------------
 Frame Length = 78 (00 00 4e)
 Frame Type = DATA (00)

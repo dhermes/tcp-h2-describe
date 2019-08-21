@@ -11,6 +11,9 @@
 # limitations under the License.
 
 import struct
+import textwrap
+
+import hpack
 
 
 PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
@@ -22,6 +25,7 @@ PREFACE_PRETTY = r"""Client Connection Preface
 HEADER = "=" * 60
 FOOTER = "-" * 40
 STRUCT_L = struct.Struct(">L")
+HPACK_DECODER = hpack.Decoder()
 # See: https://http2.github.io/http2-spec/#iana-frames
 FRAME_TYPES = {
     0x0: "DATA",
@@ -39,34 +43,39 @@ FRAME_TYPES = {
 # some flags apply to only certain frame types (e.g. END_STREAM only applies
 # to DATA or HEADERS frames). This is why the mapping is keys first based on
 # the frame type.
+FLAG_ACK = 0x1
+FLAG_END_STREAM = 0x1
+FLAG_END_HEADERS = 0x4
+FLAG_PADDED = 0x8
+FLAG_PRIORITY = 0x20
 FLAGS_DEFINED = {
     # See: https://http2.github.io/http2-spec/#DATA
-    "DATA": {0x1: "END_STREAM", 0x8: "PADDED"},
+    "DATA": {FLAG_END_STREAM: "END_STREAM", FLAG_PADDED: "PADDED"},
     # See: https://http2.github.io/http2-spec/#HEADERS
     "HEADERS": {
-        0x1: "END_STREAM",
-        0x4: "END_HEADERS",
-        0x8: "PADDED",
-        0x20: "PRIORITY",
+        FLAG_END_STREAM: "END_STREAM",
+        FLAG_END_HEADERS: "END_HEADERS",
+        FLAG_PADDED: "PADDED",
+        FLAG_PRIORITY: "PRIORITY",
     },
     # See: https://http2.github.io/http2-spec/#PRIORITY
     "PRIORITY": {},
     # See: https://http2.github.io/http2-spec/#RST_STREAM
     "RST_STREAM": {},
     # See: https://http2.github.io/http2-spec/#SETTINGS
-    "SETTINGS": {0x1: "ACK"},
+    "SETTINGS": {FLAG_ACK: "ACK"},
     # See: https://http2.github.io/http2-spec/#PUSH_PROMISE
-    "PUSH_PROMISE": {0x4: "END_HEADERS", 0x8: "PADDED"},
+    "PUSH_PROMISE": {FLAG_END_HEADERS: "END_HEADERS", FLAG_PADDED: "PADDED"},
     # See: https://http2.github.io/http2-spec/#PING
-    "PING": {0x1: "ACK"},
+    "PING": {FLAG_ACK: "ACK"},
     # See: https://http2.github.io/http2-spec/#GOAWAY
     "GOAWAY": {},
     # See: https://http2.github.io/http2-spec/#WINDOW_UPDATE
     "WINDOW_UPDATE": {},
     # See: https://http2.github.io/http2-spec/#CONTINUATION
-    "CONTINUATION": {0x4: "END_HEADERS"},
+    "CONTINUATION": {FLAG_END_HEADERS: "END_HEADERS"},
 }
-FLAGS_PAYLOAD_HANDLERS = {}
+FRAME_PAYLOAD_HANDLERS = {}
 RESERVED_HIGHEST_BIT = 0x80000000
 
 
@@ -130,21 +139,58 @@ def describe_flags(frame_type, flags):
     return " | ".join(description_parts)
 
 
-def default_payload_handler(frame_payload):
+def default_payload_handler(frame_payload, unused_flags):
     """Default handler for an HTTP/2 frame payload.
 
     Acts as identity function.
 
     Args:
         frame_payload (bytes): The frame payload to be parsed.
+        unused_flags (int): The flags for the frame payload.
 
     Returns:
-        str: The payload returned as-is.
+        str: The frame payload returned as-is with a prefix.
     """
     return f"Frame Payload = {frame_payload}"
 
 
-def handle_window_update_payload(frame_payload):
+def handle_headers_payload(frame_payload, flags):
+    """Handle a HEADERS HTTP/2 frame payload.
+
+    .. HEADERS spec: https://http2.github.io/http2-spec/#HEADERS
+
+    See `HEADERS spec`_.
+
+    Args:
+        frame_payload (bytes): The frame payload to be parsed.
+        flags (int): The flags for the frame payload.
+
+    Returns:
+        str: A list of the headers in the payload and the hexdump for
+        ``frame_payload``.
+
+    Raises:
+        NotImplementedError: If ``flags`` has ``PADDED`` set.
+        NotImplementedError: If ``flags`` has ``PRIORITY`` set.
+    """
+    if flags & FLAG_PADDED == FLAG_PADDED:
+        raise NotImplementedError(
+            "PADDED flag not currently supported for headers"
+        )
+    if flags & FLAG_PRIORITY == FLAG_PRIORITY:
+        raise NotImplementedError(
+            "PRIORITY flag not currently supported for headers"
+        )
+
+    lines = ["Headers ="]
+    headers = HPACK_DECODER.decode(frame_payload)
+    lines.extend(f"   {key!r} -> {value!r}" for key, value in headers)
+    lines.append("Hexdump =")
+    lines.append(textwrap.indent(simple_hexdump(frame_payload), "   "))
+    return "\n".join(lines)
+
+
+def handle_window_update_payload(frame_payload, unused_flags):
     """Handle a WINDOW_UPDATE HTTP/2 frame payload.
 
     .. WINDOW_UPDATE spec: https://http2.github.io/http2-spec/#WINDOW_UPDATE
@@ -153,6 +199,7 @@ def handle_window_update_payload(frame_payload):
 
     Args:
         frame_payload (bytes): The frame payload to be parsed.
+        unused_flags (int): The flags for the frame payload.
 
     Returns:
         str: Description of the reserved bit, window size increment and display
@@ -171,13 +218,10 @@ def handle_window_update_payload(frame_payload):
         window_size_increment -= RESERVED_HIGHEST_BIT
 
     return (
-        f"Reserved Bit: {reserved_bit}, "
-        f"Window Size Increment: {window_size_increment}"
+        f"Reserved Bit = {reserved_bit}, "
+        f"Window Size Increment = {window_size_increment}"
         f"({simple_hexdump(frame_payload, row_size=-1)})"
     )
-
-
-FLAGS_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
 
 
 def next_h2_frame(h2_frames):
@@ -216,9 +260,10 @@ def next_h2_frame(h2_frames):
     frame_type_hex = simple_hexdump(h2_frames[3:4], row_size=-1)
     parts.append(f"Frame Type = {frame_type} ({frame_type_hex})")
     # Flags
-    flags = describe_flags(frame_type, h2_frames[4])
+    flags = h2_frames[4]
+    flags_str = describe_flags(frame_type, flags)
     flags_hex = simple_hexdump(h2_frames[4:5], row_size=-1)
-    parts.append(f"Flags = {flags} ({flags_hex})")
+    parts.append(f"Flags = {flags_str} ({flags_hex})")
     # Stream Identifier
     stream_identifier, = STRUCT_L.unpack(h2_frames[5:9])
     stream_identifier_hex = simple_hexdump(h2_frames[5:9], row_size=-1)
@@ -232,8 +277,8 @@ def next_h2_frame(h2_frames):
             " HTTP/2 frame not large enough to contain frame payload",
             h2_frames,
         )
-    handler = FLAGS_PAYLOAD_HANDLERS.get(frame_type, default_payload_handler)
-    parts.append(handler(frame_payload))
+    handler = FRAME_PAYLOAD_HANDLERS.get(frame_type, default_payload_handler)
+    parts.append(handler(frame_payload, flags))
 
     return parts, h2_frames[9 + frame_length :]
 
@@ -279,3 +324,8 @@ def describe(h2_frames, connection_description, expect_preface):
         parts.append(FOOTER)
 
     return "\n".join(parts)
+
+
+# Register the frame payload handlers.
+FRAME_PAYLOAD_HANDLERS["HEADERS"] = handle_headers_payload
+FRAME_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
