@@ -164,6 +164,9 @@ def default_payload_handler(frame_payload, unused_flags):
     Returns:
         str: The frame payload returned as-is with a prefix.
     """
+    if frame_payload == "":
+        return ""
+
     return f"Frame Payload = {frame_payload}"
 
 
