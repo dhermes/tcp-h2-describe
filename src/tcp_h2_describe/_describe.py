@@ -21,10 +21,10 @@ PREFACE_PRETTY = r"""Client Connection Preface
    b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'"""
 HEADER = "=" * 60
 FOOTER = "-" * 40
-_STRUCT_L = struct.Struct(">L")
+STRUCT_L = struct.Struct(">L")
 
 
-def _simple_hexdump(bytes_, row_size=16):
+def simple_hexdump(bytes_, row_size=16):
     """Convert a bytestring into hex characters.
 
     This is called "simple" because it doesn't print the index in the leftmost
@@ -51,7 +51,7 @@ def _simple_hexdump(bytes_, row_size=16):
     return "\n".join(rows)
 
 
-def _next_h2_frame(h2_frames):
+def next_h2_frame(h2_frames):
     """Parse the next HTTP/2 frame from a partially parsed TCP frame.
 
     .. frame header spec: https://http2.github.io/http2-spec/#FrameHeader
@@ -79,20 +79,20 @@ def _next_h2_frame(h2_frames):
         )
 
     # Frame length
-    frame_length, = _STRUCT_L.unpack(b"\x00" + h2_frames[:3])
-    frame_length_hex = _simple_hexdump(h2_frames[:3], row_size=-1)
+    frame_length, = STRUCT_L.unpack(b"\x00" + h2_frames[:3])
+    frame_length_hex = simple_hexdump(h2_frames[:3], row_size=-1)
     parts = [f"Frame Length = {frame_length} ({frame_length_hex})"]
     # Frame Type
     frame_type = h2_frames[3]
-    frame_type_hex = _simple_hexdump(h2_frames[3:4], row_size=-1)
+    frame_type_hex = simple_hexdump(h2_frames[3:4], row_size=-1)
     parts.append(f"Frame Type = {frame_type} ({frame_type_hex})")
     # Flags
     flags = h2_frames[4]
-    flags_hex = _simple_hexdump(h2_frames[4:5], row_size=-1)
+    flags_hex = simple_hexdump(h2_frames[4:5], row_size=-1)
     parts.append(f"Flags = {flags} ({flags_hex})")
     # Stream Identifier
-    stream_identifier, = _STRUCT_L.unpack(h2_frames[5:9])
-    stream_identifier_hex = _simple_hexdump(h2_frames[5:9], row_size=-1)
+    stream_identifier, = STRUCT_L.unpack(h2_frames[5:9])
+    stream_identifier_hex = simple_hexdump(h2_frames[5:9], row_size=-1)
     parts.append(
         f"Stream Identifier = {stream_identifier} ({stream_identifier_hex})"
     )
@@ -144,7 +144,7 @@ def describe(h2_frames, connection_description, expect_preface):
         h2_frames = h2_frames[len(PREFACE) :]
 
     while h2_frames:
-        frame_parts, h2_frames = _next_h2_frame(h2_frames)
+        frame_parts, h2_frames = next_h2_frame(h2_frames)
         parts.extend(frame_parts)
         parts.append(FOOTER)
 
