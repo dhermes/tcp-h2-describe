@@ -14,22 +14,50 @@
 import tcp_h2_describe._display
 
 
+PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
+PREFACE_PRETTY = """\
+Client Connection Preface
+50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
+0d 0a 53 4d 0d 0a 0d 0a
+   ... decoded as raw bytes ...
+   b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+"""
 HEADER = "=" * 60
-FOOTER = "-" * 60
+FOOTER = "-" * 40
 
 
-def describe(h2_frame, connection_description):
+def describe(h2_frames, connection_description, expect_preface):
     """Describe an HTTP/2 frame.
 
+    .. connection header spec: https://http2.github.io/http2-spec/#ConnectionHeader
+
     Args:
-        h2_frame (bytes): The raw bytes of an HTTP/2 frame that has been sent
-            via TCP.
+        h2_frames (bytes): The raw bytes of a TCP frame containing HTTP/2
+            frames that have been sent via TCP.
         connection_description (str): A description of the RECV->SEND
             relationship for a socket pair.
+        expect_preface (bool): Indicates if the ``h2_frames`` should begin
+            with the client connection preface. This should only be
+            :data:`True` on the **first** TCP frame for the client socket.
+            See `connection header spec`_.
+
+    Raises:
+        RuntimeError: If ``expect_preface`` is :data:`True` but ``h2_frames``
+            does not begin with the client connection preface.
     """
-    # NOTE: For now this is a dummy implementation.
+    if expect_preface:
+        if not h2_frames.startswith(PREFACE):
+            raise RuntimeError(
+                "Expected TCP frame to begin with client connection preface",
+                h2_frames,
+            )
+
+        print(PREFACE_PRETTY)
+        print(FOOTER)
+        h2_frames = h2_frames[len(PREFACE) :]
+
     message = (
         f"{HEADER}\n{connection_description}\n\n"
-        f"HTTP/2 frame: {h2_frame}\n{FOOTER}"
+        f"HTTP/2 frame: {h2_frames}\n{FOOTER}"
     )
     tcp_h2_describe._display.display(message)

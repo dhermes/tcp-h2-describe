@@ -18,7 +18,7 @@ import tcp_h2_describe._describe
 import tcp_h2_describe._display
 
 
-def redirect_socket(recv_socket, send_socket, description):
+def redirect_socket(recv_socket, send_socket, description, expect_preface):
     """Redirect a TCP stream from one socket to another.
 
     This only redirects in **one** direction, i.e. it RECVs from
@@ -29,11 +29,18 @@ def redirect_socket(recv_socket, send_socket, description):
         send_socket (socket.socket): The socket that will be SENT to.
         description (str): A description of the RECV->SEND relationship for
             this socket pair.
+        expect_preface (bool): Indicates if the ``h2_frames`` should begin
+            with the client connection preface. This should only be
+            :data:`True` on the **first** TCP frame for the client socket.
     """
     tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket)
     while tcp_chunk != b"":
         # Describe the chunk that was just encountered
-        tcp_h2_describe._describe.describe(tcp_chunk, description)
+        tcp_h2_describe._describe.describe(
+            tcp_chunk, description, expect_preface
+        )
+        # After the first usage, make sure ``expect_preface`` is not set.
+        expect_preface = False
 
         tcp_h2_describe._buffer.send(send_socket, tcp_chunk)
         # Read the next chunk from the socket.
@@ -70,12 +77,12 @@ def connect_socket_pair(client_socket, client_addr, server_host, server_port):
     read_description = f"client({client_addr})->proxy->server({server_addr})"
     t_read = threading.Thread(
         target=redirect_socket,
-        args=(client_socket, server_socket, read_description),
+        args=(client_socket, server_socket, read_description, True),
     )
     write_description = f"server({server_addr})->proxy->client({client_addr})"
     t_write = threading.Thread(
         target=redirect_socket,
-        args=(server_socket, client_socket, write_description),
+        args=(server_socket, client_socket, write_description, False),
     )
 
     t_read.start()

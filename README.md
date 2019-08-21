@@ -83,6 +83,7 @@ $ h2-example/bin/python _bin/h2_server.py > /dev/null 2>&1 &
 $ python -m tcp_h2_describe --server-port 8080
 Starting tcp-h2-describe proxy server on port 24909
   Proxying server located at localhost:8080
+...
 ```
 
 If we hit the proxy directly
