@@ -149,13 +149,11 @@ Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Settings =
 ----------------------------------------
 Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Settings =
 ----------------------------------------
 ============================================================
 client(127.0.0.1:59600)->proxy->server(localhost:8080)
@@ -164,7 +162,6 @@ Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Settings =
 ----------------------------------------
 ============================================================
 client(127.0.0.1:59600)->proxy->server(localhost:8080)

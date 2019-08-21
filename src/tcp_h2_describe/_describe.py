@@ -229,6 +229,9 @@ def handle_settings_payload(frame_payload, unused_flags):
             frame_payload,
         )
 
+    if num_settings == 0:
+        return ""
+
     lines = ["Settings ="]
     for setting in range(num_settings):
         start = 6 * setting
@@ -359,7 +362,9 @@ def next_h2_frame(h2_frames):
             h2_frames,
         )
     handler = FRAME_PAYLOAD_HANDLERS.get(frame_type, default_payload_handler)
-    parts.append(handler(frame_payload, flags))
+    frame_payload_part = handler(frame_payload, flags)
+    if frame_payload_part != "":
+        parts.append(frame_payload_part)
 
     return parts, h2_frames[9 + frame_length :]
 
