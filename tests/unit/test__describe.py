@@ -53,7 +53,17 @@ class Test_describe:
                 "",
                 tcp_h2_describe._describe.PREFACE_PRETTY,
                 tcp_h2_describe._describe.FOOTER,
-                f"HTTP/2 frame: {h2_frames[24:]}",
+                "Frame Length = 36 (00 00 24)",
+                "Frame Type = 4 (04)",
+                "Flags = 0 (00)",
+                "Stream Identifier = 0 (00 00 00 00)",
+                f"Frame Payload = {h2_frames[33:69]}",
+                tcp_h2_describe._describe.FOOTER,
+                "Frame Length = 6 (00 00 06)",
+                "Frame Type = 4 (04)",
+                "Flags = 0 (00)",
+                "Stream Identifier = 0 (00 00 00 00)",
+                f"Frame Payload = {h2_frames[78:]}",
                 tcp_h2_describe._describe.FOOTER,
             ]
         )
@@ -76,7 +86,11 @@ class Test_describe:
                 tcp_h2_describe._describe.HEADER,
                 connection_description,
                 "",
-                f"HTTP/2 frame: {h2_frames}",
+                "Frame Length = 36 (00 00 24)",
+                "Frame Type = 4 (04)",
+                "Flags = 0 (00)",
+                "Stream Identifier = 0 (00 00 00 00)",
+                f"Frame Payload = {h2_frames[9:]}",
                 tcp_h2_describe._describe.FOOTER,
             ]
         )
