@@ -245,6 +245,32 @@ def handle_settings_payload(frame_payload, unused_flags):
     return "\n".join(lines)
 
 
+def handle_ping_payload(frame_payload, unused_flags):
+    """Handle a PING HTTP/2 frame payload.
+
+    .. PING spec: https://http2.github.io/http2-spec/#PING
+
+    See `PING spec`_.
+
+    Args:
+        frame_payload (bytes): The frame payload to be parsed.
+        unused_flags (int): The flags for the frame payload.
+
+    Returns:
+        str: The opaque data in ``frame_payload`` as a hexdump.
+
+    Raises:
+        ValueError: If the length of ``frame_payload`` is not 8.
+    """
+    if len(frame_payload) != 8:
+        raise ValueError(
+            "The length of the frame payload is not 8.", frame_payload
+        )
+
+    opaque_data = simple_hexdump(frame_payload, row_size=-1)
+    return f"Opaque Data = {opaque_data}"
+
+
 def handle_window_update_payload(frame_payload, unused_flags):
     """Handle a WINDOW_UPDATE HTTP/2 frame payload.
 
@@ -385,3 +411,4 @@ def describe(h2_frames, connection_description, expect_preface):
 FRAME_PAYLOAD_HANDLERS["HEADERS"] = handle_headers_payload
 FRAME_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
 FRAME_PAYLOAD_HANDLERS["SETTINGS"] = handle_settings_payload
+FRAME_PAYLOAD_HANDLERS["PING"] = handle_ping_payload
