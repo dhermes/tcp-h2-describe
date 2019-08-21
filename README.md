@@ -103,7 +103,7 @@ Accepted connection from 127.0.0.1:59600
 client(127.0.0.1:59600)->proxy->server(localhost:8080)
 
 Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
-Hexdump =
+Hexdump (Client Connection Preface) =
    50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
    0d 0a 53 4d 0d 0a 0d 0a
 ----------------------------------------
@@ -112,19 +112,19 @@ Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Settings =
-   SETTINGS_HEADER_TABLE_SIZE: 4096 (00 01 00 00 10 00)
-   SETTINGS_ENABLE_PUSH: 1 (00 02 00 00 00 01)
-   SETTINGS_INITIAL_WINDOW_SIZE: 65535 (00 04 00 00 ff ff)
-   SETTINGS_MAX_FRAME_SIZE: 16384 (00 05 00 00 40 00)
-   SETTINGS_MAX_CONCURRENT_STREAMS: 100 (00 03 00 00 00 64)
-   SETTINGS_MAX_HEADER_LIST_SIZE: 65536 (00 06 00 01 00 00)
+   SETTINGS_HEADER_TABLE_SIZE:0x1 -> 4096 (00 01 | 00 00 10 00)
+   SETTINGS_ENABLE_PUSH:0x2 -> 1 (00 02 | 00 00 00 01)
+   SETTINGS_INITIAL_WINDOW_SIZE:0x4 -> 65535 (00 04 | 00 00 ff ff)
+   SETTINGS_MAX_FRAME_SIZE:0x5 -> 16384 (00 05 | 00 00 40 00)
+   SETTINGS_MAX_CONCURRENT_STREAMS:0x3 -> 100 (00 03 | 00 00 00 64)
+   SETTINGS_MAX_HEADER_LIST_SIZE:0x6 -> 65536 (00 06 | 00 01 00 00)
 ----------------------------------------
 Frame Length = 6 (00 00 06)
 Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Settings =
-   SETTINGS_ENABLE_PUSH: 0 (00 02 00 00 00 00)
+   SETTINGS_ENABLE_PUSH:0x2 -> 0 (00 02 | 00 00 00 00)
 ----------------------------------------
 ============================================================
 server(localhost:8080)->proxy->client(127.0.0.1:59600)
@@ -134,12 +134,12 @@ Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Settings =
-   SETTINGS_HEADER_TABLE_SIZE: 4096 (00 01 00 00 10 00)
-   SETTINGS_ENABLE_PUSH: 0 (00 02 00 00 00 00)
-   SETTINGS_INITIAL_WINDOW_SIZE: 65535 (00 04 00 00 ff ff)
-   SETTINGS_MAX_FRAME_SIZE: 16384 (00 05 00 00 40 00)
-   SETTINGS_MAX_CONCURRENT_STREAMS: 100 (00 03 00 00 00 64)
-   SETTINGS_MAX_HEADER_LIST_SIZE: 65536 (00 06 00 01 00 00)
+   SETTINGS_HEADER_TABLE_SIZE:0x1 -> 4096 (00 01 | 00 00 10 00)
+   SETTINGS_ENABLE_PUSH:0x2 -> 0 (00 02 | 00 00 00 00)
+   SETTINGS_INITIAL_WINDOW_SIZE:0x4 -> 65535 (00 04 | 00 00 ff ff)
+   SETTINGS_MAX_FRAME_SIZE:0x5 -> 16384 (00 05 | 00 00 40 00)
+   SETTINGS_MAX_CONCURRENT_STREAMS:0x3 -> 100 (00 03 | 00 00 00 64)
+   SETTINGS_MAX_HEADER_LIST_SIZE:0x6 -> 65536 (00 06 | 00 01 00 00)
 ----------------------------------------
 ============================================================
 server(localhost:8080)->proxy->client(127.0.0.1:59600)
@@ -174,7 +174,7 @@ Headers =
    ':scheme' -> 'http'
    ':authority' -> 'localhost'
    ':path' -> '/'
-Hexdump =
+Hexdump (Compressed Headers) =
    82 86 41 86 a0 e4 1d 13 9d 09 84
 ----------------------------------------
 ============================================================
@@ -189,7 +189,7 @@ Headers =
    'server' -> 'basic-h2-server/1.0'
    'content-length' -> '78'
    'content-type' -> 'application/json'
-Hexdump =
+Hexdump (Compressed Headers) =
    88 76 8e 8c 68 31 16 9c 4b 20 b6 77 2d 8c 05 70
    7f 5c 82 75 ef 5f 8b 1d 75 d0 62 0d 26 3d 4c 74
    41 ea

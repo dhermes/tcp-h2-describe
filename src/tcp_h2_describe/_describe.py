@@ -18,7 +18,7 @@ import hpack
 
 PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
 PREFACE_PRETTY = r"""Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
-Hexdump =
+Hexdump (Client Connection Preface) =
    50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
    0d 0a 53 4d 0d 0a 0d 0a"""
 HEADER = "=" * 60
@@ -174,8 +174,9 @@ def handle_headers_payload(frame_payload, flags):
     """Handle a HEADERS HTTP/2 frame payload.
 
     .. HEADERS spec: https://http2.github.io/http2-spec/#HEADERS
+    .. header compression and decompression: https://http2.github.io/http2-spec/#HeaderBlock
 
-    See `HEADERS spec`_.
+    See `HEADERS spec`_ and `header compression and decompression`_.
 
     Args:
         frame_payload (bytes): The frame payload to be parsed.
@@ -201,7 +202,7 @@ def handle_headers_payload(frame_payload, flags):
     lines = ["Headers ="]
     headers = HPACK_DECODER.decode(frame_payload)
     lines.extend(f"   {key!r} -> {value!r}" for key, value in headers)
-    lines.append("Hexdump =")
+    lines.append("Hexdump (Compressed Headers) =")
     lines.append(textwrap.indent(simple_hexdump(frame_payload), "   "))
     return "\n".join(lines)
 
@@ -240,12 +241,19 @@ def handle_settings_payload(frame_payload, unused_flags):
 
         setting_id, = STRUCT_H.unpack(frame_payload[start : start + 2])
         setting_id_str = SETTINGS.get(setting_id, "UNKNOWN")
-        setting_value, = STRUCT_L.unpack(frame_payload[start + 2 : start + 6])
-        setting_hex = simple_hexdump(
-            frame_payload[start : start + 6], row_size=-1
+        setting_id_hex = simple_hexdump(
+            frame_payload[start : start + 2], row_size=-1
         )
 
-        lines.append(f"   {setting_id_str}: {setting_value} ({setting_hex})")
+        setting_value, = STRUCT_L.unpack(frame_payload[start + 2 : start + 6])
+        setting_value_hex = simple_hexdump(
+            frame_payload[start + 2 : start + 6], row_size=-1
+        )
+
+        lines.append(
+            f"   {setting_id_str}:{hex(setting_id)} -> "
+            f"{setting_value} ({setting_id_hex} | {setting_value_hex})"
+        )
 
     return "\n".join(lines)
 
