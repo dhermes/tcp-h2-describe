@@ -22,6 +22,19 @@ PREFACE_PRETTY = r"""Client Connection Preface
 HEADER = "=" * 60
 FOOTER = "-" * 40
 STRUCT_L = struct.Struct(">L")
+# SEE: https://http2.github.io/http2-spec/#iana-frames
+FRAME_TYPES = {
+    0x0: "DATA",
+    0x1: "HEADERS",
+    0x2: "PRIORITY",
+    0x3: "RST_STREAM",
+    0x4: "SETTINGS",
+    0x5: "PUSH_PROMISE",
+    0x6: "PING",
+    0x7: "GOAWAY",
+    0x8: "WINDOW_UPDATE",
+    0x9: "CONTINUATION",
+}
 
 
 def simple_hexdump(bytes_, row_size=16):
@@ -83,7 +96,7 @@ def next_h2_frame(h2_frames):
     frame_length_hex = simple_hexdump(h2_frames[:3], row_size=-1)
     parts = [f"Frame Length = {frame_length} ({frame_length_hex})"]
     # Frame Type
-    frame_type = h2_frames[3]
+    frame_type = FRAME_TYPES[h2_frames[3]]
     frame_type_hex = simple_hexdump(h2_frames[3:4], row_size=-1)
     parts.append(f"Frame Type = {frame_type} ({frame_type_hex})")
     # Flags
