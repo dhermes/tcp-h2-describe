@@ -110,13 +110,13 @@ Client Connection Preface
 ----------------------------------------
 Frame Length = 36 (00 00 24)
 Frame Type = SETTINGS (04)
-Flags = 0 (00)
+Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b'\x00\x01\x00\x00\x10\x00\x00\x02\x00\x00\x00\x01\x00\x04\x00\x00\xff\xff\x00\x05\x00\x00@\x00\x00\x03\x00\x00\x00d\x00\x06\x00\x01\x00\x00'
 ----------------------------------------
 Frame Length = 6 (00 00 06)
 Frame Type = SETTINGS (04)
-Flags = 0 (00)
+Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b'\x00\x02\x00\x00\x00\x00'
 ----------------------------------------
@@ -125,7 +125,7 @@ server(localhost:8080)->proxy->client(127.0.0.1:59600)
 
 Frame Length = 36 (00 00 24)
 Frame Type = SETTINGS (04)
-Flags = 0 (00)
+Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b'\x00\x01\x00\x00\x10\x00\x00\x02\x00\x00\x00\x00\x00\x04\x00\x00\xff\xff\x00\x05\x00\x00@\x00\x00\x03\x00\x00\x00d\x00\x06\x00\x01\x00\x00'
 ----------------------------------------
@@ -134,13 +134,13 @@ server(localhost:8080)->proxy->client(127.0.0.1:59600)
 
 Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
-Flags = 1 (01)
+Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b''
 ----------------------------------------
 Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
-Flags = 1 (01)
+Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b''
 ----------------------------------------
@@ -149,7 +149,7 @@ client(127.0.0.1:59600)->proxy->server(localhost:8080)
 
 Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
-Flags = 1 (01)
+Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
 Frame Payload = b''
 ----------------------------------------
@@ -158,7 +158,7 @@ client(127.0.0.1:59600)->proxy->server(localhost:8080)
 
 Frame Length = 11 (00 00 0b)
 Frame Type = HEADERS (01)
-Flags = 5 (05)
+Flags = END_STREAM:0x1 | END_HEADERS:0x4 (05)
 Stream Identifier = 1 (00 00 00 01)
 Frame Payload = b'\x82\x86A\x86\xa0\xe4\x1d\x13\x9d\t\x84'
 ----------------------------------------
@@ -167,13 +167,13 @@ server(localhost:8080)->proxy->client(127.0.0.1:59600)
 
 Frame Length = 34 (00 00 22)
 Frame Type = HEADERS (01)
-Flags = 4 (04)
+Flags = END_HEADERS:0x4 (04)
 Stream Identifier = 1 (00 00 00 01)
 Frame Payload = b'\x88v\x8e\x8ch1\x16\x9cK \xb6w-\x8c\x05p\x7f\\\x82u\xef_\x8b\x1du\xd0b\r&=LtA\xea'
 ----------------------------------------
 Frame Length = 78 (00 00 4e)
 Frame Type = DATA (00)
-Flags = 1 (01)
+Flags = END_STREAM:0x1 (01)
 Stream Identifier = 1 (00 00 00 01)
 Frame Payload = b'{":method": "GET", ":scheme": "http", ":authority": "localhost", ":path": "/"}'
 ----------------------------------------

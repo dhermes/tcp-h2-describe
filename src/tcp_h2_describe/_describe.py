@@ -22,7 +22,7 @@ PREFACE_PRETTY = r"""Client Connection Preface
 HEADER = "=" * 60
 FOOTER = "-" * 40
 STRUCT_L = struct.Struct(">L")
-# SEE: https://http2.github.io/http2-spec/#iana-frames
+# See: https://http2.github.io/http2-spec/#iana-frames
 FRAME_TYPES = {
     0x0: "DATA",
     0x1: "HEADERS",
@@ -34,6 +34,37 @@ FRAME_TYPES = {
     0x7: "GOAWAY",
     0x8: "WINDOW_UPDATE",
     0x9: "CONTINUATION",
+}
+# The following bit flags are defined "globally" (i.e. across all types), but
+# some flags apply to only certain frame types (e.g. END_STREAM only applies
+# to DATA or HEADERS frames). This is why the mapping is keys first based on
+# the frame type.
+FLAGS_DEFINED = {
+    # See: https://http2.github.io/http2-spec/#DATA
+    "DATA": {0x1: "END_STREAM", 0x8: "PADDED"},
+    # See: https://http2.github.io/http2-spec/#HEADERS
+    "HEADERS": {
+        0x1: "END_STREAM",
+        0x4: "END_HEADERS",
+        0x8: "PADDED",
+        0x20: "PRIORITY",
+    },
+    # See: https://http2.github.io/http2-spec/#PRIORITY
+    "PRIORITY": {},
+    # See: https://http2.github.io/http2-spec/#RST_STREAM
+    "RST_STREAM": {},
+    # See: https://http2.github.io/http2-spec/#SETTINGS
+    "SETTINGS": {0x1: "ACK"},
+    # See: https://http2.github.io/http2-spec/#PUSH_PROMISE
+    "PUSH_PROMISE": {0x4: "END_HEADERS", 0x8: "PADDED"},
+    # See: https://http2.github.io/http2-spec/#PING
+    "PING": {0x1: "ACK"},
+    # See: https://http2.github.io/http2-spec/#GOAWAY
+    "GOAWAY": {},
+    # See: https://http2.github.io/http2-spec/#WINDOW_UPDATE
+    "WINDOW_UPDATE": {},
+    # See: https://http2.github.io/http2-spec/#CONTINUATION
+    "CONTINUATION": {0x4: "END_HEADERS"},
 }
 
 
@@ -62,6 +93,39 @@ def simple_hexdump(bytes_, row_size=16):
     for i in range(0, len(bytes_), row_size):
         rows.append(" ".join(f"{c:02x}" for c in bytes_[i : i + row_size]))
     return "\n".join(rows)
+
+
+def describe_flags(frame_type, flags):
+    """Convert a set of flags into a description.
+
+    Args:
+        frame_type (str): The type of the current frame.
+        flags (int): The flags for the current frame.
+
+    Returns:
+        str: The "pretty" description of the flags.
+
+    Raises:
+        RuntimeError: If not all bit flags are accounted for.
+    """
+    flag_map = FLAGS_DEFINED[frame_type]
+
+    remaining = flags
+    description_parts = []
+    for flag_value in sorted(flag_map.keys()):
+        if remaining & flag_value == flag_value:
+            remaining -= flag_value
+            description_parts.append(
+                f"{flag_map[flag_value]}:{hex(flag_value)}"
+            )
+
+    if remaining != 0:
+        raise RuntimeError("Some flags not accounted for", frame_type, flags)
+
+    if not description_parts:
+        return "UNSET"
+
+    return " | ".join(description_parts)
 
 
 def next_h2_frame(h2_frames):
@@ -100,7 +164,7 @@ def next_h2_frame(h2_frames):
     frame_type_hex = simple_hexdump(h2_frames[3:4], row_size=-1)
     parts.append(f"Frame Type = {frame_type} ({frame_type_hex})")
     # Flags
-    flags = h2_frames[4]
+    flags = describe_flags(frame_type, h2_frames[4])
     flags_hex = simple_hexdump(h2_frames[4:5], row_size=-1)
     parts.append(f"Flags = {flags} ({flags_hex})")
     # Stream Identifier
