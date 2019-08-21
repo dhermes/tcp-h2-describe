@@ -16,4 +16,4 @@ import tcp_h2_describe
 def test___version__():
     # NOTE: This hardcodes the version here to make sure `pkg_resources` picks
     #       up the version in `setup.py`.
-    assert tcp_h2_describe.__version__ == "0.0.2.dev1"
+    assert tcp_h2_describe.__version__ == "0.0.2"
