@@ -66,6 +66,8 @@ FLAGS_DEFINED = {
     # See: https://http2.github.io/http2-spec/#CONTINUATION
     "CONTINUATION": {0x4: "END_HEADERS"},
 }
+FLAGS_PAYLOAD_HANDLERS = {}
+RESERVED_HIGHEST_BIT = 0x80000000
 
 
 def simple_hexdump(bytes_, row_size=16):
@@ -128,6 +130,56 @@ def describe_flags(frame_type, flags):
     return " | ".join(description_parts)
 
 
+def default_payload_handler(frame_payload):
+    """Default handler for an HTTP/2 frame payload.
+
+    Acts as identity function.
+
+    Args:
+        frame_payload (bytes): The frame payload to be parsed.
+
+    Returns:
+        str: The payload returned as-is.
+    """
+    return f"Frame Payload = {frame_payload}"
+
+
+def handle_window_update_payload(frame_payload):
+    """Handle a WINDOW_UPDATE HTTP/2 frame payload.
+
+    .. WINDOW_UPDATE spec: https://http2.github.io/http2-spec/#WINDOW_UPDATE
+
+    See `WINDOW_UPDATE spec`_.
+
+    Args:
+        frame_payload (bytes): The frame payload to be parsed.
+
+    Returns:
+        str: Description of the reserved bit, window size increment and display
+            of the hexdump for ``frame_payload``.
+
+    Raises:
+        ValueError: If the ``frame_payload`` does not have 4 bytes.
+    """
+    if len(frame_payload) != 4:
+        raise ValueError("")
+
+    window_size_increment, = STRUCT_L.unpack(frame_payload)
+    reserved_bit = 0
+    if window_size_increment & RESERVED_HIGHEST_BIT == RESERVED_HIGHEST_BIT:
+        reserved_bit = 1
+        window_size_increment -= RESERVED_HIGHEST_BIT
+
+    return (
+        f"Reserved Bit: {reserved_bit}, "
+        f"Window Size Increment: {window_size_increment}"
+        f"({simple_hexdump(frame_payload, row_size=-1)})"
+    )
+
+
+FLAGS_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
+
+
 def next_h2_frame(h2_frames):
     """Parse the next HTTP/2 frame from a partially parsed TCP frame.
 
@@ -180,7 +232,8 @@ def next_h2_frame(h2_frames):
             " HTTP/2 frame not large enough to contain frame payload",
             h2_frames,
         )
-    parts.append(f"Frame Payload = {frame_payload}")
+    handler = FLAGS_PAYLOAD_HANDLERS.get(frame_type, default_payload_handler)
+    parts.append(handler(frame_payload))
 
     return parts, h2_frames[9 + frame_length :]
 
