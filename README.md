@@ -198,7 +198,14 @@ Frame Length = 78 (00 00 4e)
 Frame Type = DATA (00)
 Flags = END_STREAM:0x1 (01)
 Stream Identifier = 1 (00 00 00 01)
-Frame Payload = b'{":method": "GET", ":scheme": "http", ":authority": "localhost", ":path": "/"}'
+Frame Payload =
+   b'{":method": "GET", ":scheme": "http", ":authority": "localhost", ":path": "/"}'
+Hexdump (Frame Payload) =
+   7b 22 3a 6d 65 74 68 6f 64 22 3a 20 22 47 45 54
+   22 2c 20 22 3a 73 63 68 65 6d 65 22 3a 20 22 68
+   74 74 70 22 2c 20 22 3a 61 75 74 68 6f 72 69 74
+   79 22 3a 20 22 6c 6f 63 61 6c 68 6f 73 74 22 2c
+   20 22 3a 70 61 74 68 22 3a 20 22 2f 22 7d
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:59600)->proxy->server(localhost:8080)
 ```

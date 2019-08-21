@@ -167,7 +167,14 @@ def default_payload_handler(frame_payload, unused_flags):
     if frame_payload == "":
         return ""
 
-    return f"Frame Payload = {frame_payload}"
+    return "\n".join(
+        [
+            "Frame Payload =",
+            f"   {frame_payload}",
+            "Hexdump (Frame Payload) =",
+            textwrap.indent(simple_hexdump(frame_payload), "   "),
+        ]
+    )
 
 
 def handle_headers_payload(frame_payload, flags):
