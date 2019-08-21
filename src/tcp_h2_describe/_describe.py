@@ -24,6 +24,7 @@ PREFACE_PRETTY = r"""Client Connection Preface
    b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'"""
 HEADER = "=" * 60
 FOOTER = "-" * 40
+STRUCT_H = struct.Struct(">H")
 STRUCT_L = struct.Struct(">L")
 HPACK_DECODER = hpack.Decoder()
 # See: https://http2.github.io/http2-spec/#iana-frames
@@ -77,6 +78,19 @@ FLAGS_DEFINED = {
 }
 FRAME_PAYLOAD_HANDLERS = {}
 RESERVED_HIGHEST_BIT = 0x80000000
+SETTINGS = {
+    # See: https://http2.github.io/http2-spec/#SettingValues
+    0x1: "SETTINGS_HEADER_TABLE_SIZE",
+    0x2: "SETTINGS_ENABLE_PUSH",
+    0x3: "SETTINGS_MAX_CONCURRENT_STREAMS",
+    0x4: "SETTINGS_INITIAL_WINDOW_SIZE",
+    0x5: "SETTINGS_MAX_FRAME_SIZE",
+    0x6: "SETTINGS_MAX_HEADER_LIST_SIZE",
+    # See: https://tools.ietf.org/html/rfc8441
+    0x8: "SETTINGS_ENABLE_CONNECT_PROTOCOL",
+    # See: https://github.com/grpc/proposal/blob/master/G1-true-binary-metadata.md
+    0xFE03: "GRPC_ALLOW_TRUE_BINARY_METADATA",
+}
 
 
 def simple_hexdump(bytes_, row_size=16):
@@ -187,6 +201,47 @@ def handle_headers_payload(frame_payload, flags):
     lines.extend(f"   {key!r} -> {value!r}" for key, value in headers)
     lines.append("Hexdump =")
     lines.append(textwrap.indent(simple_hexdump(frame_payload), "   "))
+    return "\n".join(lines)
+
+
+def handle_settings_payload(frame_payload, unused_flags):
+    """Handle a SETTINGS HTTP/2 frame payload.
+
+    .. SETTINGS spec: https://http2.github.io/http2-spec/#SETTINGS
+
+    See `SETTINGS spec`_.
+
+    Args:
+        frame_payload (bytes): The frame payload to be parsed.
+        unused_flags (int): The flags for the frame payload.
+
+    Returns:
+        str: A list of all the settings in ``frame_payload``, as well as a
+        hexdump for each 6-octet setting.
+
+    Raises:
+        ValueError: If the length of ``frame_payload`` is not a multiple of 6.
+    """
+    num_settings, remainder = divmod(len(frame_payload), 6)
+    if remainder != 0:
+        raise ValueError(
+            "The length of the frame payload is not a multiple of 6.",
+            frame_payload,
+        )
+
+    lines = ["Settings ="]
+    for setting in range(num_settings):
+        start = 6 * setting
+
+        setting_id, = STRUCT_H.unpack(frame_payload[start : start + 2])
+        setting_id_str = SETTINGS.get(setting_id, "UNKNOWN")
+        setting_value, = STRUCT_L.unpack(frame_payload[start + 2 : start + 6])
+        setting_hex = simple_hexdump(
+            frame_payload[start : start + 6], row_size=-1
+        )
+
+        lines.append(f"   {setting_id_str}: {setting_value} ({setting_hex})")
+
     return "\n".join(lines)
 
 
@@ -329,3 +384,4 @@ def describe(h2_frames, connection_description, expect_preface):
 # Register the frame payload handlers.
 FRAME_PAYLOAD_HANDLERS["HEADERS"] = handle_headers_payload
 FRAME_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
+FRAME_PAYLOAD_HANDLERS["SETTINGS"] = handle_settings_payload

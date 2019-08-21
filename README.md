@@ -112,13 +112,20 @@ Frame Length = 36 (00 00 24)
 Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b'\x00\x01\x00\x00\x10\x00\x00\x02\x00\x00\x00\x01\x00\x04\x00\x00\xff\xff\x00\x05\x00\x00@\x00\x00\x03\x00\x00\x00d\x00\x06\x00\x01\x00\x00'
+Settings =
+   SETTINGS_HEADER_TABLE_SIZE: 4096 (00 01 00 00 10 00)
+   SETTINGS_ENABLE_PUSH: 1 (00 02 00 00 00 01)
+   SETTINGS_INITIAL_WINDOW_SIZE: 65535 (00 04 00 00 ff ff)
+   SETTINGS_MAX_FRAME_SIZE: 16384 (00 05 00 00 40 00)
+   SETTINGS_MAX_CONCURRENT_STREAMS: 100 (00 03 00 00 00 64)
+   SETTINGS_MAX_HEADER_LIST_SIZE: 65536 (00 06 00 01 00 00)
 ----------------------------------------
 Frame Length = 6 (00 00 06)
 Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b'\x00\x02\x00\x00\x00\x00'
+Settings =
+   SETTINGS_ENABLE_PUSH: 0 (00 02 00 00 00 00)
 ----------------------------------------
 ============================================================
 server(localhost:8080)->proxy->client(127.0.0.1:59600)
@@ -127,7 +134,13 @@ Frame Length = 36 (00 00 24)
 Frame Type = SETTINGS (04)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b'\x00\x01\x00\x00\x10\x00\x00\x02\x00\x00\x00\x00\x00\x04\x00\x00\xff\xff\x00\x05\x00\x00@\x00\x00\x03\x00\x00\x00d\x00\x06\x00\x01\x00\x00'
+Settings =
+   SETTINGS_HEADER_TABLE_SIZE: 4096 (00 01 00 00 10 00)
+   SETTINGS_ENABLE_PUSH: 0 (00 02 00 00 00 00)
+   SETTINGS_INITIAL_WINDOW_SIZE: 65535 (00 04 00 00 ff ff)
+   SETTINGS_MAX_FRAME_SIZE: 16384 (00 05 00 00 40 00)
+   SETTINGS_MAX_CONCURRENT_STREAMS: 100 (00 03 00 00 00 64)
+   SETTINGS_MAX_HEADER_LIST_SIZE: 65536 (00 06 00 01 00 00)
 ----------------------------------------
 ============================================================
 server(localhost:8080)->proxy->client(127.0.0.1:59600)
@@ -136,13 +149,13 @@ Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b''
+Settings =
 ----------------------------------------
 Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b''
+Settings =
 ----------------------------------------
 ============================================================
 client(127.0.0.1:59600)->proxy->server(localhost:8080)
@@ -151,7 +164,7 @@ Frame Length = 0 (00 00 00)
 Frame Type = SETTINGS (04)
 Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
-Frame Payload = b''
+Settings =
 ----------------------------------------
 ============================================================
 client(127.0.0.1:59600)->proxy->server(localhost:8080)
