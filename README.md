@@ -102,11 +102,10 @@ Accepted connection from 127.0.0.1:59600
 ============================================================
 client(127.0.0.1:59600)->proxy->server(localhost:8080)
 
-Client Connection Preface
-50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
-0d 0a 53 4d 0d 0a 0d 0a
-   --- decoded as raw bytes ---
-   b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+Hexdump =
+   50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
+   0d 0a 53 4d 0d 0a 0d 0a
 ----------------------------------------
 Frame Length = 36 (00 00 24)
 Frame Type = SETTINGS (04)

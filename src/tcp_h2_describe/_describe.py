@@ -17,11 +17,10 @@ import hpack
 
 
 PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
-PREFACE_PRETTY = r"""Client Connection Preface
-50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
-0d 0a 53 4d 0d 0a 0d 0a
-   --- decoded as raw bytes ---
-   b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'"""
+PREFACE_PRETTY = r"""Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+Hexdump =
+   50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
+   0d 0a 53 4d 0d 0a 0d 0a"""
 HEADER = "=" * 60
 FOOTER = "-" * 40
 STRUCT_H = struct.Struct(">H")
