@@ -36,9 +36,10 @@ def redirect_socket(recv_socket, send_socket, description, expect_preface):
     tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket)
     while tcp_chunk != b"":
         # Describe the chunk that was just encountered
-        tcp_h2_describe._describe.describe(
+        message = tcp_h2_describe._describe.describe(
             tcp_chunk, description, expect_preface
         )
+        tcp_h2_describe._display.display(message)
         # After the first usage, make sure ``expect_preface`` is not set.
         expect_preface = False
 

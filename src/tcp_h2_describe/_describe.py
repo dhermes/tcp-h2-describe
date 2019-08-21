@@ -11,17 +11,12 @@
 # limitations under the License.
 
 
-import tcp_h2_describe._display
-
-
 PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
-PREFACE_PRETTY = """\
-Client Connection Preface
+PREFACE_PRETTY = r"""Client Connection Preface
 50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
 0d 0a 53 4d 0d 0a 0d 0a
    ... decoded as raw bytes ...
-   b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
-"""
+   b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'"""
 HEADER = "=" * 60
 FOOTER = "-" * 40
 
@@ -41,10 +36,16 @@ def describe(h2_frames, connection_description, expect_preface):
             :data:`True` on the **first** TCP frame for the client socket.
             See `connection header spec`_.
 
+    Returns:
+        str: The description of ``h2_frames``, expected to be printed by the
+            caller.
+
     Raises:
         RuntimeError: If ``expect_preface`` is :data:`True` but ``h2_frames``
             does not begin with the client connection preface.
     """
+    parts = [HEADER, connection_description, ""]
+
     if expect_preface:
         if not h2_frames.startswith(PREFACE):
             raise RuntimeError(
@@ -52,12 +53,8 @@ def describe(h2_frames, connection_description, expect_preface):
                 h2_frames,
             )
 
-        print(PREFACE_PRETTY)
-        print(FOOTER)
+        parts.extend([PREFACE_PRETTY, FOOTER])
         h2_frames = h2_frames[len(PREFACE) :]
 
-    message = (
-        f"{HEADER}\n{connection_description}\n\n"
-        f"HTTP/2 frame: {h2_frames}\n{FOOTER}"
-    )
-    tcp_h2_describe._display.display(message)
+    parts.extend([f"HTTP/2 frame: {h2_frames}", FOOTER])
+    return "\n".join(parts)
