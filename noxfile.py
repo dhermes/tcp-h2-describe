@@ -37,3 +37,23 @@ def unit(session):
     # Run pytest against the unit tests.
     run_args = ["pytest"] + session.posargs + [get_path("tests", "unit")]
     session.run(*run_args)
+
+
+@nox.session(py=DEFAULT_INTERPRETER)
+def generate_pb(session):
+    """(Re)-generate ``*_pb2.py`` files from ``protobuf`` definitions."""
+    # Install all dependencies.
+    session.install("--upgrade", "grpcio-tools")
+    # Generate the ``*_pb2.py`` files.
+    src_dest = get_path("_grpc", relative=False)
+    session.run(
+        "python",
+        "-m",
+        "grpc_tools.protoc",
+        "-I" + get_path("_grpc"),
+        "--python_out",
+        src_dest,
+        "--grpc_python_out",
+        src_dest,
+        get_path("_grpc", "users.proto"),
+    )
