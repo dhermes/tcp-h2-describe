@@ -75,7 +75,22 @@ FLAGS_DEFINED = {
     # See: https://http2.github.io/http2-spec/#CONTINUATION
     "CONTINUATION": {FLAG_END_HEADERS: "END_HEADERS"},
 }
-FRAME_PAYLOAD_HANDLERS = {}
+# NOTE: Using an ``object()`` sentinel for an identity check will not work
+#       across threads. However, it's not expected that code using this module
+#       will be forked.
+UNSET = object()
+FRAME_PAYLOAD_HANDLERS = {
+    "DATA": UNSET,
+    "HEADERS": UNSET,
+    "PRIORITY": UNSET,
+    "RST_STREAM": UNSET,
+    "SETTINGS": UNSET,
+    "PUSH_PROMISE": UNSET,
+    "PING": UNSET,
+    "GOAWAY": UNSET,
+    "WINDOW_UPDATE": UNSET,
+    "CONTINUATION": UNSET,
+}
 RESERVED_HIGHEST_BIT = 0x80000000
 SETTINGS = {
     # See: https://http2.github.io/http2-spec/#SettingValues
@@ -378,8 +393,7 @@ def next_h2_frame(h2_frames):
             " HTTP/2 frame not large enough to contain frame payload",
             h2_frames,
         )
-    handler = FRAME_PAYLOAD_HANDLERS.get(frame_type, default_payload_handler)
-    frame_payload_part = handler(frame_payload, flags)
+    frame_payload_part = handle_frame(frame_type, frame_payload, flags)
     if frame_payload_part != "":
         parts.append(frame_payload_part)
 
@@ -429,8 +443,61 @@ def describe(h2_frames, connection_description, expect_preface):
     return "\n".join(parts)
 
 
+def register_payload_handler(frame_type, handler):
+    """Register a handler for frame payloads.
+
+    .. note::
+
+        This function updates a mapping, but is not threadsafe.
+
+    This function should be called well before :func:`serve_proxy`.
+
+    Args:
+        frame_type (str): A frame type, e.g. ``DATA``.
+        handler (Callable[[bytes, int], str]): A handler for a frame payload.
+            The arguments are ``frame_payload`` and ``flags`` and the return
+            value is a string.
+
+    Raises:
+        ValueError: If ``frame_type`` is an invalid value.
+        KeyError: If ``frame_type`` already has a registered handler.
+    """
+    existing = FRAME_PAYLOAD_HANDLERS.get(frame_type)
+    if existing is None:
+        raise ValueError(f"Invalid frame type {frame_type}")
+
+    if existing is not UNSET:
+        raise KeyError(f"Frame type {frame_type} already has a handler")
+
+    FRAME_PAYLOAD_HANDLERS[frame_type] = handler
+
+
+def handle_frame(frame_type, frame_payload, flags):
+    """Register a handler for frame payloads.
+
+    Args:
+        frame_type (str): A frame type, e.g. ``DATA``.
+        frame_payload (bytes): The frame payload to be parsed.
+        flags (int): The flags for the frame payload.
+
+    Returns:
+        str: The full description of the frame payload.
+
+    Raises:
+        ValueError: If ``frame_type`` is an invalid value.
+    """
+    handler = FRAME_PAYLOAD_HANDLERS.get(frame_type)
+    if handler is None:
+        raise ValueError(f"Invalid frame type {frame_type}")
+
+    if handler is UNSET:
+        handler = default_payload_handler
+
+    return handler(frame_payload, flags)
+
+
 # Register the frame payload handlers.
-FRAME_PAYLOAD_HANDLERS["HEADERS"] = handle_headers_payload
-FRAME_PAYLOAD_HANDLERS["WINDOW_UPDATE"] = handle_window_update_payload
-FRAME_PAYLOAD_HANDLERS["SETTINGS"] = handle_settings_payload
-FRAME_PAYLOAD_HANDLERS["PING"] = handle_ping_payload
+register_payload_handler("HEADERS", handle_headers_payload)
+register_payload_handler("WINDOW_UPDATE", handle_window_update_payload)
+register_payload_handler("SETTINGS", handle_settings_payload)
+register_payload_handler("PING", handle_ping_payload)
