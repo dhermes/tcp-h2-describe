@@ -1,7 +1,5 @@
 # `tcp-h2-describe`
 
-[![PyPI package](https://img.shields.io/pypi/v/tcp-h2-describe.svg)](https://pypi.org/project/tcp-h2-describe/)
-
 > Python library and CLI for running an HTTP/2 proxy that describes each frame
 
 ## Install
@@ -84,7 +82,7 @@ for more information on how to get started.
 `tcp-h2-describe` is made available under the Apache 2.0 License. For more
 details, see the [LICENSE][2].
 
-[1]: https://github.com/dhermes/tcp-h2-describe/blob/master/README.md
-[2]: https://github.com/dhermes/tcp-h2-describe/blob/master/LICENSE
-[3]: https://github.com/dhermes/tcp-h2-describe/blob/master/EXAMPLE-HTTP.md
-[4]: https://github.com/dhermes/tcp-h2-describe/blob/master/EXAMPLE-gRPC.md
+[1]: https://github.com/dhermes/tcp-h2-describe/blob/0.0.3/README.md
+[2]: https://github.com/dhermes/tcp-h2-describe/blob/0.0.3/LICENSE
+[3]: https://github.com/dhermes/tcp-h2-describe/blob/0.0.3/EXAMPLE-HTTP.md
+[4]: https://github.com/dhermes/tcp-h2-describe/blob/0.0.3/EXAMPLE-gRPC.md

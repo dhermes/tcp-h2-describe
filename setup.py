@@ -15,7 +15,7 @@ from __future__ import print_function
 import setuptools
 
 
-VERSION = "0.0.3.dev1"
+VERSION = "0.0.3"
 REQUIREMENTS = ("hpack >= 3.0.0",)
 DESCRIPTION = (
     "Python library and CLI for running an HTTP/2 proxy that describes "
