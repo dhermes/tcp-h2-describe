@@ -335,7 +335,7 @@ def handle_window_update_payload(frame_payload, unused_flags):
 
     return (
         f"Reserved Bit = {reserved_bit}, "
-        f"Window Size Increment = {window_size_increment}"
+        f"Window Size Increment = {window_size_increment} "
         f"({simple_hexdump(frame_payload, row_size=-1)})"
     )
 
