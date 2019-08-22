@@ -800,7 +800,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 282 (00 00 01 1a)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033google/protobuf/empty.proto\"9\n\004User\022\022\n\nfirst_name\030\001 \001(\t\022\021\n\tlast_name\030\002 \001(\t\022\n\n\002id\030\003 \001(\004\"\"\n\017AddUserResponse\022\017\n\007user_id\030\001 \001(\0042w\n\005Users\0226\n\007AddUser\022\016.users.v1.User\032\031.users.v1.AddUserResponse\"\000\0226\n\010GetUsers\022\026.google.protobuf.Empty\032\016.users.v1.User\"\0000\001b\006proto3"
+     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033..."
    }
 Hexdump (Protobuf Message) =
    22 97 02 0a 94 02 0a 0b 75 73 65 72 73 2e 70 72
@@ -890,7 +890,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 189 (00 00 00 bd)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017google.protobuf\"\007\n\005EmptyBv\n\023com.google.protobufB\nEmptyProtoP\001Z\'github.com/golang/protobuf/ptypes/empty\370\001\001\242\002\003GPB\252\002\036Google.Protobuf.WellKnownTypesb\006proto3"
+     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017..."
    }
 Hexdump (Protobuf Message) =
    22 ba 01 0a b7 01 0a 1b 67 6f 6f 67 6c 65 2f 70
@@ -1100,7 +1100,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 282 (00 00 01 1a)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033google/protobuf/empty.proto\"9\n\004User\022\022\n\nfirst_name\030\001 \001(\t\022\021\n\tlast_name\030\002 \001(\t\022\n\n\002id\030\003 \001(\004\"\"\n\017AddUserResponse\022\017\n\007user_id\030\001 \001(\0042w\n\005Users\0226\n\007AddUser\022\016.users.v1.User\032\031.users.v1.AddUserResponse\"\000\0226\n\010GetUsers\022\026.google.protobuf.Empty\032\016.users.v1.User\"\0000\001b\006proto3"
+     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033..."
    }
 Hexdump (Protobuf Message) =
    22 97 02 0a 94 02 0a 0b 75 73 65 72 73 2e 70 72
@@ -1190,7 +1190,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 189 (00 00 00 bd)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017google.protobuf\"\007\n\005EmptyBv\n\023com.google.protobufB\nEmptyProtoP\001Z\'github.com/golang/protobuf/ptypes/empty\370\001\001\242\002\003GPB\252\002\036Google.Protobuf.WellKnownTypesb\006proto3"
+     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017..."
    }
 Hexdump (Protobuf Message) =
    22 ba 01 0a b7 01 0a 1b 67 6f 6f 67 6c 65 2f 70
@@ -1402,7 +1402,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 282 (00 00 01 1a)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033google/protobuf/empty.proto\"9\n\004User\022\022\n\nfirst_name\030\001 \001(\t\022\021\n\tlast_name\030\002 \001(\t\022\n\n\002id\030\003 \001(\004\"\"\n\017AddUserResponse\022\017\n\007user_id\030\001 \001(\0042w\n\005Users\0226\n\007AddUser\022\016.users.v1.User\032\031.users.v1.AddUserResponse\"\000\0226\n\010GetUsers\022\026.google.protobuf.Empty\032\016.users.v1.User\"\0000\001b\006proto3"
+     file_descriptor_proto: "\n\013users.proto\022\010users.v1\032\033..."
    }
 Hexdump (Protobuf Message) =
    22 97 02 0a 94 02 0a 0b 75 73 65 72 73 2e 70 72
@@ -1492,7 +1492,7 @@ gRPC Tag = 0 (00)
 Protobuf Length = 189 (00 00 00 bd)
 Protobuf Message (grpc.reflection.v1alpha.ServerReflectionResponse) =
    file_descriptor_response {
-     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017google.protobuf\"\007\n\005EmptyBv\n\023com.google.protobufB\nEmptyProtoP\001Z\'github.com/golang/protobuf/ptypes/empty\370\001\001\242\002\003GPB\252\002\036Google.Protobuf.WellKnownTypesb\006proto3"
+     file_descriptor_proto: "\n\033google/protobuf/empty.proto\022\017..."
    }
 Hexdump (Protobuf Message) =
    22 ba 01 0a b7 01 0a 1b 67 6f 6f 67 6c 65 2f 70
