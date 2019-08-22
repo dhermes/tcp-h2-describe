@@ -6,10 +6,13 @@ If we run the basic gRPC users service stored in the `_grpc` subdirectory:
 $ python3 -m virtualenv grpc-example
 $ grpc-example/bin/python -m pip install \
 >   grpcio==1.23.0 protobuf==3.9.1 six==1.12.0
+$ grpc-example/bin/python -m pip install .
 $ PYTHONPATH=_grpc/ GRPC_PORT=38895 grpc-example/bin/python \
 >   _bin/grpc_server.py > /dev/null 2>&1 &
 [1] 4035
-$ python -m tcp_h2_describe --server-port 38895
+$
+$ GRPC_PORT=38895 grpc-example/bin/python \
+>   _bin/grpc_proxy.py
 Starting tcp-h2-describe proxy server on port 24909
   Proxying server located at localhost:38895
 ...
@@ -22,19 +25,19 @@ If we hit the proxy directly by using the **proxy's** `GRPC_PORT` with
 $ PYTHONPATH=_grpc/ GRPC_PORT=24909 grpc-example/bin/python \
 >   _bin/call_grpc.py
 Inserted user:
-   id: 14536452530745446389
+   id: 10390446211102371457
 
 Inserted user:
-   id: 11933193420109397255
+   id: 1075829461972331103
 
 Retrieving users:
    User:
-      id: 11933193420109397255
+      id: 1075829461972331103
       first_name: "Alice"
       last_name: "Redmond"
 
    User:
-      id: 14536452530745446389
+      id: 10390446211102371457
       first_name: "Bob"
       last_name: "Green"
 
@@ -45,9 +48,9 @@ we'll see all the frames:
 ```
 ...
   Proxying server located at localhost:38895
-Accepted connection from 127.0.0.1:51345
+Accepted connection from 127.0.0.1:51600
 ============================================================
-client(127.0.0.1:51345)->proxy->server(localhost:38895)
+client(127.0.0.1:51600)->proxy->server(localhost:38895)
 
 Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 Hexdump (Client Connection Preface) =
@@ -120,11 +123,12 @@ Frame Length = 17 (00 00 11)
 Frame Type = DATA (00)
 Flags = END_STREAM:0x1 (01)
 Stream Identifier = 1 (00 00 00 01)
-Frame Payload =
-   b'\x00\x00\x00\x00\x0c\x12\x03Bob\x1a\x05Green'
-Hexdump (Frame Payload) =
-   00 00 00 00 0c 12 03 42 6f 62 1a 05 47 72 65 65
-   6e
+gRPC Tag = 0 (00)
+Protobuf Length = 12 (00 00 00 0c)
+Protobuf Message =
+   b'\x12\x03Bob\x1a\x05Green'
+Hexdump (Protobuf Message) =
+   12 03 42 6f 62 1a 05 47 72 65 65 6e
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
@@ -133,7 +137,7 @@ Stream Identifier = 0 (00 00 00 00)
 Reserved Bit = 0, Window Size Increment = 5 (00 00 00 05)
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 24 (00 00 18)
 Frame Type = SETTINGS (04)
@@ -158,7 +162,7 @@ Stream Identifier = 0 (00 00 00 00)
 Opaque Data = 00 00 00 00 00 00 00 00
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 8 (00 00 08)
 Frame Type = PING (06)
@@ -178,7 +182,7 @@ Stream Identifier = 0 (00 00 00 00)
 Reserved Bit = 0, Window Size Increment = 17 (00 00 00 11)
 ----------------------------------------
 ============================================================
-client(127.0.0.1:51345)->proxy->server(localhost:38895)
+client(127.0.0.1:51600)->proxy->server(localhost:38895)
 
 Frame Length = 8 (00 00 08)
 Frame Type = PING (06)
@@ -192,7 +196,7 @@ Flags = ACK:0x1 (01)
 Stream Identifier = 0 (00 00 00 00)
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 107 (00 00 6b)
 Frame Type = HEADERS (01)
@@ -216,10 +220,12 @@ Frame Length = 16 (00 00 10)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 1 (00 00 00 01)
-Frame Payload =
-   b'\x00\x00\x00\x00\x0b\x08\xf5\x9f\xa4\xeb\xf2\xd1\xf6\xdd\xc9\x01'
-Hexdump (Frame Payload) =
-   00 00 00 00 0b 08 f5 9f a4 eb f2 d1 f6 dd c9 01
+gRPC Tag = 0 (00)
+Protobuf Length = 11 (00 00 00 0b)
+Protobuf Message =
+   b'\x08\x81\xdd\xbd\xf4\xf2\xf8\x91\x99\x90\x01'
+Hexdump (Protobuf Message) =
+   08 81 dd bd f4 f2 f8 91 99 90 01
 ----------------------------------------
 Frame Length = 30 (00 00 1e)
 Frame Type = HEADERS (01)
@@ -233,7 +239,7 @@ Hexdump (Compressed Headers) =
    0c 67 72 70 63 2d 6d 65 73 73 61 67 65 00
 ----------------------------------------
 ============================================================
-client(127.0.0.1:51345)->proxy->server(localhost:38895)
+client(127.0.0.1:51600)->proxy->server(localhost:38895)
 
 Frame Length = 34 (00 00 22)
 Frame Type = HEADERS (01)
@@ -264,11 +270,12 @@ Frame Length = 21 (00 00 15)
 Frame Type = DATA (00)
 Flags = END_STREAM:0x1 (01)
 Stream Identifier = 3 (00 00 00 03)
-Frame Payload =
-   b'\x00\x00\x00\x00\x10\x12\x05Alice\x1a\x07Redmond'
-Hexdump (Frame Payload) =
-   00 00 00 00 10 12 05 41 6c 69 63 65 1a 07 52 65
-   64 6d 6f 6e 64
+gRPC Tag = 0 (00)
+Protobuf Length = 16 (00 00 00 10)
+Protobuf Message =
+   b'\x12\x05Alice\x1a\x07Redmond'
+Hexdump (Protobuf Message) =
+   12 05 41 6c 69 63 65 1a 07 52 65 64 6d 6f 6e 64
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
@@ -277,7 +284,7 @@ Stream Identifier = 0 (00 00 00 00)
 Reserved Bit = 0, Window Size Increment = 16 (00 00 00 10)
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)
@@ -291,14 +298,16 @@ Headers =
 Hexdump (Compressed Headers) =
    88 c2 c1 c0
 ----------------------------------------
-Frame Length = 16 (00 00 10)
+Frame Length = 15 (00 00 0f)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 3 (00 00 00 03)
-Frame Payload =
-   b'\x00\x00\x00\x00\x0b\x08\x87\xfa\x98\xcd\x8d\x86\xce\xcd\xa5\x01'
-Hexdump (Frame Payload) =
-   00 00 00 00 0b 08 87 fa 98 cd 8d 86 ce cd a5 01
+gRPC Tag = 0 (00)
+Protobuf Length = 10 (00 00 00 0a)
+Protobuf Message =
+   b'\x08\xdf\xd4\x8a\xbe\xa1\xa6\x87\xf7\x0e'
+Hexdump (Protobuf Message) =
+   08 df d4 8a be a1 a6 87 f7 0e
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)
@@ -317,7 +326,7 @@ Stream Identifier = 0 (00 00 00 00)
 Reserved Bit = 0, Window Size Increment = 21 (00 00 00 15)
 ----------------------------------------
 ============================================================
-client(127.0.0.1:51345)->proxy->server(localhost:38895)
+client(127.0.0.1:51600)->proxy->server(localhost:38895)
 
 Frame Length = 35 (00 00 23)
 Frame Type = HEADERS (01)
@@ -342,19 +351,21 @@ Frame Length = 5 (00 00 05)
 Frame Type = DATA (00)
 Flags = END_STREAM:0x1 (01)
 Stream Identifier = 5 (00 00 00 05)
-Frame Payload =
-   b'\x00\x00\x00\x00\x00'
-Hexdump (Frame Payload) =
-   00 00 00 00 00
+gRPC Tag = 0 (00)
+Protobuf Length = 0 (00 00 00 00)
+Protobuf Message =
+   b''
+Hexdump (Protobuf Message) =
+
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
-Reserved Bit = 0, Window Size Increment = 11 (00 00 00 0b)
+Reserved Bit = 0, Window Size Increment = 10 (00 00 00 0a)
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)
@@ -368,15 +379,17 @@ Headers =
 Hexdump (Compressed Headers) =
    88 c2 c1 c0
 ----------------------------------------
-Frame Length = 32 (00 00 20)
+Frame Length = 31 (00 00 1f)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 5 (00 00 00 05)
-Frame Payload =
-   b'\x00\x00\x00\x00\x1b\x08\x87\xfa\x98\xcd\x8d\x86\xce\xcd\xa5\x01\x12\x05Alice\x1a\x07Redmond'
-Hexdump (Frame Payload) =
-   00 00 00 00 1b 08 87 fa 98 cd 8d 86 ce cd a5 01
-   12 05 41 6c 69 63 65 1a 07 52 65 64 6d 6f 6e 64
+gRPC Tag = 0 (00)
+Protobuf Length = 26 (00 00 00 1a)
+Protobuf Message =
+   b'\x08\xdf\xd4\x8a\xbe\xa1\xa6\x87\xf7\x0e\x12\x05Alice\x1a\x07Redmond'
+Hexdump (Protobuf Message) =
+   08 df d4 8a be a1 a6 87 f7 0e 12 05 41 6c 69 63
+   65 1a 07 52 65 64 6d 6f 6e 64
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
@@ -385,17 +398,19 @@ Stream Identifier = 0 (00 00 00 00)
 Reserved Bit = 0, Window Size Increment = 5 (00 00 00 05)
 ----------------------------------------
 ============================================================
-server(localhost:38895)->proxy->client(127.0.0.1:51345)
+server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
 Frame Length = 28 (00 00 1c)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 5 (00 00 00 05)
-Frame Payload =
-   b'\x00\x00\x00\x00\x17\x08\xf5\x9f\xa4\xeb\xf2\xd1\xf6\xdd\xc9\x01\x12\x03Bob\x1a\x05Green'
-Hexdump (Frame Payload) =
-   00 00 00 00 17 08 f5 9f a4 eb f2 d1 f6 dd c9 01
-   12 03 42 6f 62 1a 05 47 72 65 65 6e
+gRPC Tag = 0 (00)
+Protobuf Length = 23 (00 00 00 17)
+Protobuf Message =
+   b'\x08\x81\xdd\xbd\xf4\xf2\xf8\x91\x99\x90\x01\x12\x03Bob\x1a\x05Green'
+Hexdump (Protobuf Message) =
+   08 81 dd bd f4 f2 f8 91 99 90 01 12 03 42 6f 62
+   1a 05 47 72 65 65 6e
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)
@@ -407,5 +422,5 @@ Headers =
 Hexdump (Compressed Headers) =
    bf 0f 2f 00
 ----------------------------------------
-Done redirecting socket for client(127.0.0.1:51345)->proxy->server(localhost:38895)
+Done redirecting socket for client(127.0.0.1:51600)->proxy->server(localhost:38895)
 ```
