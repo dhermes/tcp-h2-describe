@@ -353,10 +353,6 @@ Flags = END_STREAM:0x1 (01)
 Stream Identifier = 5 (00 00 00 05)
 gRPC Tag = 0 (00)
 Protobuf Length = 0 (00 00 00 00)
-Protobuf Message =
-   b''
-Hexdump (Protobuf Message) =
-
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)

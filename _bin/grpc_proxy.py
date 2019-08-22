@@ -66,16 +66,21 @@ def handle_data_payload(frame_payload, flags):
     length_bytes = simple_hexdump(frame_payload[1:5])
 
     pb_bytes = frame_payload[5:]
-    return "\n".join(
-        [
-            "gRPC Tag = 0 (00)",
-            f"Protobuf Length = {length} ({length_bytes})",
-            "Protobuf Message =",
-            f"   {pb_bytes}",
-            "Hexdump (Protobuf Message) =",
-            textwrap.indent(simple_hexdump(pb_bytes), "   "),
-        ]
-    )
+    parts = [
+        "gRPC Tag = 0 (00)",
+        f"Protobuf Length = {length} ({length_bytes})",
+    ]
+    if length > 0:
+        parts.extend(
+            [
+                "Protobuf Message =",
+                f"   {pb_bytes}",
+                "Hexdump (Protobuf Message) =",
+                textwrap.indent(simple_hexdump(pb_bytes), "   "),
+            ]
+        )
+
+    return "\n".join(parts)
 
 
 def main():
