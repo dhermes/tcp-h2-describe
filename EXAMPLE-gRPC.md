@@ -11,7 +11,7 @@ $ PYTHONPATH=_grpc/ GRPC_PORT=38895 grpc-example/bin/python \
 >   _bin/grpc_server.py > /dev/null 2>&1 &
 [1] 4035
 $
-$ GRPC_PORT=38895 grpc-example/bin/python \
+$ PYTHONPATH=_grpc/ GRPC_PORT=38895 grpc-example/bin/python \
 >   _bin/grpc_proxy.py
 Starting tcp-h2-describe proxy server on port 24909
   Proxying server located at localhost:38895
@@ -25,21 +25,21 @@ If we hit the proxy directly by using the **proxy's** `GRPC_PORT` with
 $ PYTHONPATH=_grpc/ GRPC_PORT=24909 grpc-example/bin/python \
 >   _bin/call_grpc.py
 Inserted user:
-   id: 10390446211102371457
+   user_id: 3079877744918980318
 
 Inserted user:
-   id: 1075829461972331103
+   user_id: 7444709551642703711
 
 Retrieving users:
    User:
-      id: 1075829461972331103
-      first_name: "Alice"
-      last_name: "Redmond"
-
-   User:
-      id: 10390446211102371457
       first_name: "Bob"
       last_name: "Green"
+      id: 3079877744918980318
+
+   User:
+      first_name: "Alice"
+      last_name: "Redmond"
+      id: 7444709551642703711
 
 ```
 
@@ -125,10 +125,11 @@ Flags = END_STREAM:0x1 (01)
 Stream Identifier = 1 (00 00 00 01)
 gRPC Tag = 0 (00)
 Protobuf Length = 12 (00 00 00 0c)
-Protobuf Message =
-   b'\x12\x03Bob\x1a\x05Green'
+Protobuf Message (users.v1.User) =
+   first_name: "Bob"
+   last_name: "Green"
 Hexdump (Protobuf Message) =
-   12 03 42 6f 62 1a 05 47 72 65 65 6e
+   0a 03 42 6f 62 12 05 47 72 65 65 6e
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
@@ -216,16 +217,16 @@ Hexdump (Compressed Headers) =
    63 65 70 74 2d 65 6e 63 6f 64 69 6e 67 0d 69 64
    65 6e 74 69 74 79 2c 67 7a 69 70
 ----------------------------------------
-Frame Length = 16 (00 00 10)
+Frame Length = 15 (00 00 0f)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 1 (00 00 00 01)
 gRPC Tag = 0 (00)
-Protobuf Length = 11 (00 00 00 0b)
-Protobuf Message =
-   b'\x08\x81\xdd\xbd\xf4\xf2\xf8\x91\x99\x90\x01'
+Protobuf Length = 10 (00 00 00 0a)
+Protobuf Message (users.v1.AddUserResponse) =
+   user_id: 3079877744918980318
 Hexdump (Protobuf Message) =
-   08 81 dd bd f4 f2 f8 91 99 90 01
+   08 de cd 9b cc db 8f fb de 2a
 ----------------------------------------
 Frame Length = 30 (00 00 1e)
 Frame Type = HEADERS (01)
@@ -272,16 +273,17 @@ Flags = END_STREAM:0x1 (01)
 Stream Identifier = 3 (00 00 00 03)
 gRPC Tag = 0 (00)
 Protobuf Length = 16 (00 00 00 10)
-Protobuf Message =
-   b'\x12\x05Alice\x1a\x07Redmond'
+Protobuf Message (users.v1.User) =
+   first_name: "Alice"
+   last_name: "Redmond"
 Hexdump (Protobuf Message) =
-   12 05 41 6c 69 63 65 1a 07 52 65 64 6d 6f 6e 64
+   0a 05 41 6c 69 63 65 12 07 52 65 64 6d 6f 6e 64
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
 Flags = UNSET (00)
 Stream Identifier = 0 (00 00 00 00)
-Reserved Bit = 0, Window Size Increment = 16 (00 00 00 10)
+Reserved Bit = 0, Window Size Increment = 15 (00 00 00 0f)
 ----------------------------------------
 ============================================================
 server(localhost:38895)->proxy->client(127.0.0.1:51600)
@@ -304,10 +306,10 @@ Flags = UNSET (00)
 Stream Identifier = 3 (00 00 00 03)
 gRPC Tag = 0 (00)
 Protobuf Length = 10 (00 00 00 0a)
-Protobuf Message =
-   b'\x08\xdf\xd4\x8a\xbe\xa1\xa6\x87\xf7\x0e'
+Protobuf Message (users.v1.AddUserResponse) =
+   user_id: 7444709551642703711
 Hexdump (Protobuf Message) =
-   08 df d4 8a be a1 a6 87 f7 0e
+   08 df ee fb cc cb fc ba a8 67
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)
@@ -375,17 +377,19 @@ Headers =
 Hexdump (Compressed Headers) =
    88 c2 c1 c0
 ----------------------------------------
-Frame Length = 31 (00 00 1f)
+Frame Length = 27 (00 00 1b)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 5 (00 00 00 05)
 gRPC Tag = 0 (00)
-Protobuf Length = 26 (00 00 00 1a)
-Protobuf Message =
-   b'\x08\xdf\xd4\x8a\xbe\xa1\xa6\x87\xf7\x0e\x12\x05Alice\x1a\x07Redmond'
+Protobuf Length = 22 (00 00 00 16)
+Protobuf Message (users.v1.User) =
+   first_name: "Bob"
+   last_name: "Green"
+   id: 3079877744918980318
 Hexdump (Protobuf Message) =
-   08 df d4 8a be a1 a6 87 f7 0e 12 05 41 6c 69 63
-   65 1a 07 52 65 64 6d 6f 6e 64
+   0a 03 42 6f 62 12 05 47 72 65 65 6e 18 de cd 9b
+   cc db 8f fb de 2a
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = WINDOW_UPDATE (08)
@@ -396,17 +400,19 @@ Reserved Bit = 0, Window Size Increment = 5 (00 00 00 05)
 ============================================================
 server(localhost:38895)->proxy->client(127.0.0.1:51600)
 
-Frame Length = 28 (00 00 1c)
+Frame Length = 31 (00 00 1f)
 Frame Type = DATA (00)
 Flags = UNSET (00)
 Stream Identifier = 5 (00 00 00 05)
 gRPC Tag = 0 (00)
-Protobuf Length = 23 (00 00 00 17)
-Protobuf Message =
-   b'\x08\x81\xdd\xbd\xf4\xf2\xf8\x91\x99\x90\x01\x12\x03Bob\x1a\x05Green'
+Protobuf Length = 26 (00 00 00 1a)
+Protobuf Message (users.v1.User) =
+   first_name: "Alice"
+   last_name: "Redmond"
+   id: 7444709551642703711
 Hexdump (Protobuf Message) =
-   08 81 dd bd f4 f2 f8 91 99 90 01 12 03 42 6f 62
-   1a 05 47 72 65 65 6e
+   0a 05 41 6c 69 63 65 12 07 52 65 64 6d 6f 6e 64
+   18 df ee fb cc cb fc ba a8 67
 ----------------------------------------
 Frame Length = 4 (00 00 04)
 Frame Type = HEADERS (01)

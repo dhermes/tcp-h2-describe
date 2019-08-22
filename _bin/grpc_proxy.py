@@ -14,13 +14,75 @@ import os
 import struct
 import textwrap
 
+import google.protobuf.message
 import tcp_h2_describe
 import tcp_h2_describe._describe
+
+import users_pb2
 
 
 simple_hexdump = tcp_h2_describe._describe.simple_hexdump
 FLAG_PADDED = tcp_h2_describe._describe.FLAG_PADDED
 STRUCT_L = struct.Struct(">L")
+PB_TYPES = (users_pb2.User, users_pb2.AddUserResponse)
+
+
+def _maybe_parse(pb_bytes, pb_class):
+    """Attempt to parse a protobuf to a given message class.
+
+    Args:
+        pb_bytes (str): A raw protobuf serialized as a bytestring.
+        pb_class (type): A protobuf message type.
+
+    Returns:
+        object: An instance of ``pb_class`` if parsing succeeded, otherwise
+        :data:`None`.
+    """
+    pb = pb_class()
+    # NOTE: If ``ParseFromString()`` fails, the underlying Python binary
+    #       extension may print a message to STDERR. See
+    #         https://stackoverflow.com/a/17954769/1068170
+    #       for an idea on how to capture STDERR during ``ParseFromString()``.
+    try:
+        pb.ParseFromString(pb_bytes)
+    except google.protobuf.message.DecodeError:
+        return None
+
+    pb.DiscardUnknownFields()
+    if pb.SerializeToString() == pb_bytes:
+        return pb
+
+    return None
+
+
+def parse_pb(pb_bytes):
+    """Parse a serialized protobuf and display with message name.
+
+    Args:
+        pb_bytes (str): A raw protobuf serialized as a bytestring.
+
+    Returns:
+        Tuple[str, str]: Pair of the full name of the matched message type and
+        a string representation of the protobuf (with field names, etc.).
+
+    Raises:
+        ValueError: If ``pb_bytes`` could not be matched to a message type.
+    """
+    matches = []
+    for pb_class in PB_TYPES:
+        pb = _maybe_parse(pb_bytes, pb_class)
+        if pb is not None:
+            matches.append(pb)
+
+    if len(matches) != 1:
+        raise ValueError(
+            "Serialized protobuf could not be matched to a message type",
+            pb_bytes,
+            matches,
+        )
+
+    pb = matches[0]
+    return pb.DESCRIPTOR.full_name, str(pb).rstrip()
 
 
 def handle_data_payload(frame_payload, flags):
@@ -70,16 +132,18 @@ def handle_data_payload(frame_payload, flags):
         "gRPC Tag = 0 (00)",
         f"Protobuf Length = {length} ({length_bytes})",
     ]
-    if length > 0:
-        parts.extend(
-            [
-                "Protobuf Message =",
-                f"   {pb_bytes}",
-                "Hexdump (Protobuf Message) =",
-                textwrap.indent(simple_hexdump(pb_bytes), "   "),
-            ]
-        )
+    if length == 0:
+        return "\n".join(parts)
 
+    pb_name, pb_str = parse_pb(pb_bytes)
+    parts.extend(
+        [
+            f"Protobuf Message ({pb_name}) =",
+            textwrap.indent(pb_str, "   "),
+            "Hexdump (Protobuf Message) =",
+            textwrap.indent(simple_hexdump(pb_bytes), "   "),
+        ]
+    )
     return "\n".join(parts)
 
 
