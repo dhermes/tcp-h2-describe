@@ -15,7 +15,7 @@ Starting tcp-h2-describe proxy server on port 24909
 ...
 ```
 
-If we hit the proxy directly by using a **different** `GRPC_PORT` with
+If we hit the proxy directly by using the **proxy's** `GRPC_PORT` with
 `call_grpc.py`:
 
 ```
