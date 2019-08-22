@@ -1,6 +1,6 @@
 # Example With HTTP (over HTTP/2)
 
-Using an `h2` [example][1] that echos back HTTP/2 headers:
+Using an `h2` [example][1] that echoes back HTTP/2 headers:
 
 ```
 $ python3 -m virtualenv h2-example
