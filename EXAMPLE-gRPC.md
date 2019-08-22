@@ -459,7 +459,7 @@ $ grpcurl --plaintext \
 ```
 
 we'll see similar frames, with the addition of requests sent to interact
-with the reflection API:
+with the [reflection API][2]:
 
 ```
 ...
@@ -1673,3 +1673,4 @@ Done redirecting socket for client(127.0.0.1:52101)->proxy->server(localhost:388
 ```
 
 [1]: https://github.com/fullstorydev/grpcurl
+[2]: https://github.com/grpc/grpc/blob/master/doc/server-reflection.md
