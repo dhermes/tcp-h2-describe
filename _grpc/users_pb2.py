@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='users.v1',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0busers.proto\x12\x08users.v1\x1a\x1bgoogle/protobuf/empty.proto\"9\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x12\n\nfirst_name\x18\x02 \x01(\t\x12\x11\n\tlast_name\x18\x03 \x01(\t\"\x1d\n\x0f\x41\x64\x64UserResponse\x12\n\n\x02id\x18\x01 \x01(\x04\x32w\n\x05Users\x12\x36\n\x07\x41\x64\x64User\x12\x0e.users.v1.User\x1a\x19.users.v1.AddUserResponse\"\x00\x12\x36\n\x08GetUsers\x12\x16.google.protobuf.Empty\x1a\x0e.users.v1.User\"\x00\x30\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0busers.proto\x12\x08users.v1\x1a\x1bgoogle/protobuf/empty.proto\"9\n\x04User\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\x04\"\"\n\x0f\x41\x64\x64UserResponse\x12\x0f\n\x07user_id\x18\x01 \x01(\x04\x32w\n\x05Users\x12\x36\n\x07\x41\x64\x64User\x12\x0e.users.v1.User\x1a\x19.users.v1.AddUserResponse\"\x00\x12\x36\n\x08GetUsers\x12\x16.google.protobuf.Empty\x1a\x0e.users.v1.User\"\x00\x30\x01\x62\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
@@ -36,23 +36,23 @@ _USER = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='users.v1.User.id', index=0,
-      number=1, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
+      name='first_name', full_name='users.v1.User.first_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='first_name', full_name='users.v1.User.first_name', index=1,
+      name='last_name', full_name='users.v1.User.last_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='last_name', full_name='users.v1.User.last_name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='id', full_name='users.v1.User.id', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -81,7 +81,7 @@ _ADDUSERRESPONSE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='users.v1.AddUserResponse.id', index=0,
+      name='user_id', full_name='users.v1.AddUserResponse.user_id', index=0,
       number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -100,7 +100,7 @@ _ADDUSERRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=113,
-  serialized_end=142,
+  serialized_end=147,
 )
 
 DESCRIPTOR.message_types_by_name['User'] = _USER
@@ -129,8 +129,8 @@ _USERS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=144,
-  serialized_end=263,
+  serialized_start=149,
+  serialized_end=268,
   methods=[
   _descriptor.MethodDescriptor(
     name='AddUser',

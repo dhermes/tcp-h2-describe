@@ -89,7 +89,7 @@ class Users:
                 request.first_name,
                 request.last_name,
             )
-            return users_pb2.AddUserResponse(id=inserted_id)
+            return users_pb2.AddUserResponse(user_id=inserted_id)
 
     def GetUsers(self, request, unused_context):
         """Get all users from the database.
