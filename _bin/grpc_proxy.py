@@ -10,8 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import os
 import struct
+import sys
 import textwrap
 
 import google.protobuf.message
@@ -39,6 +41,27 @@ PB_TYPES = (
 )
 
 
+def _redirect_stderr(destination, file_descriptor):
+    sys.stderr.close()
+    os.dup2(destination.fileno(), file_descriptor)
+    sys.stderr = os.fdopen(file_descriptor, "w")
+
+
+@contextlib.contextmanager
+def stderr_to_devnull():
+    # H/T: https://stackoverflow.com/a/17954769/1068170
+    file_descriptor = sys.stderr.fileno()
+
+    with os.fdopen(os.dup(file_descriptor), "w") as old_stderr:
+        with open(os.devnull, "w") as file_obj:
+            _redirect_stderr(file_obj, file_descriptor)
+
+        try:
+            yield  # allow code to be run with the redirected stdout
+        finally:
+            _redirect_stderr(old_stderr, file_descriptor)
+
+
 def _maybe_parse(pb_bytes, pb_class):
     """Attempt to parse a protobuf to a given message class.
 
@@ -51,12 +74,12 @@ def _maybe_parse(pb_bytes, pb_class):
         :data:`None`.
     """
     pb = pb_class()
-    # NOTE: If ``ParseFromString()`` fails, the underlying Python binary
-    #       extension may print a message to STDERR. See
-    #         https://stackoverflow.com/a/17954769/1068170
-    #       for an idea on how to capture STDERR during ``ParseFromString()``.
     try:
-        pb.ParseFromString(pb_bytes)
+        # NOTE: If ``ParseFromString()`` fails, the underlying Python binary
+        #       extension may print a message to STDERR, so we temporarily
+        #       send STDERR to ``/dev/null`` during the function call.
+        with stderr_to_devnull():
+            pb.ParseFromString(pb_bytes)
     except google.protobuf.message.DecodeError:
         return None
 
