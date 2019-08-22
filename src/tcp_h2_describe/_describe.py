@@ -102,8 +102,6 @@ SETTINGS = {
     0x6: "SETTINGS_MAX_HEADER_LIST_SIZE",
     # See: https://tools.ietf.org/html/rfc8441
     0x8: "SETTINGS_ENABLE_CONNECT_PROTOCOL",
-    # See: https://github.com/grpc/proposal/blob/master/G1-true-binary-metadata.md
-    0xFE03: "GRPC_ALLOW_TRUE_BINARY_METADATA",
 }
 
 
@@ -494,6 +492,26 @@ def handle_frame(frame_type, frame_payload, flags):
         handler = default_payload_handler
 
     return handler(frame_payload, flags)
+
+
+def register_setting(setting_id, setting_name):
+    """Add a custom setting to the registry.
+
+    This allows callers to add custom settings (e.g.
+    ``GRPC_ALLOW_TRUE_BINARY_METADATA``) based on systems build on top of
+    HTTP/2.
+
+    Args:
+        setting_id (int): The setting to be added.
+        setting_name (str): The name of the setting being added.
+
+    Raises:
+        KeyError: If ``setting_id`` is already registered.
+    """
+    if setting_id in SETTINGS:
+        raise KeyError(f"Setting {setting_id} is already set")
+
+    SETTINGS[setting_id] = setting_name
 
 
 # Register the frame payload handlers.

@@ -13,6 +13,7 @@
 import pkg_resources
 
 from tcp_h2_describe._describe import register_payload_handler
+from tcp_h2_describe._describe import register_setting
 from tcp_h2_describe._serve import serve_proxy
 
 

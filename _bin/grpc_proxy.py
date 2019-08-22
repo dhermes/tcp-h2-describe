@@ -215,6 +215,8 @@ def handle_data_payload(frame_payload, flags):
 
 def main():
     tcp_h2_describe.register_payload_handler("DATA", handle_data_payload)
+    # See: https://github.com/grpc/proposal/blob/master/G1-true-binary-metadata.md
+    tcp_h2_describe.register_setting(0xFE03, "GRPC_ALLOW_TRUE_BINARY_METADATA")
     proxy_port = 24909
     server_port = int(os.environ.get("GRPC_PORT", 50051))
     tcp_h2_describe.serve_proxy(proxy_port, server_port)
