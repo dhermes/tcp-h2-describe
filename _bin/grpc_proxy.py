@@ -15,6 +15,7 @@ import struct
 import textwrap
 
 import google.protobuf.message
+import grpc_reflection.v1alpha.reflection_pb2
 import tcp_h2_describe
 import tcp_h2_describe._describe
 
@@ -24,7 +25,18 @@ import users_pb2
 simple_hexdump = tcp_h2_describe._describe.simple_hexdump
 FLAG_PADDED = tcp_h2_describe._describe.FLAG_PADDED
 STRUCT_L = struct.Struct(">L")
-PB_TYPES = (users_pb2.User, users_pb2.AddUserResponse)
+REFLECTION_REQUEST = (
+    grpc_reflection.v1alpha.reflection_pb2.ServerReflectionRequest
+)
+REFLECTION_RESPONSE = (
+    grpc_reflection.v1alpha.reflection_pb2.ServerReflectionResponse
+)
+PB_TYPES = (
+    users_pb2.User,
+    users_pb2.AddUserResponse,
+    REFLECTION_REQUEST,
+    REFLECTION_RESPONSE,
+)
 
 
 def _maybe_parse(pb_bytes, pb_class):
@@ -55,6 +67,33 @@ def _maybe_parse(pb_bytes, pb_class):
     return None
 
 
+def _parse_pb_prune(matches):
+    """Prune the list of matches in for a given serialized protobuf.
+
+    Args:
+        matches (list): A list of matched protobufs.
+
+    Returns:
+        list: A (potentially pruned) subset of ``matches``.
+    """
+    if len(matches) != 2:
+        return matches
+
+    pb1, pb2 = matches
+    # Break a tie between reflection request/response by just "guessing" it is
+    # a response.
+    if isinstance(pb1, REFLECTION_REQUEST) and isinstance(
+        pb2, REFLECTION_RESPONSE
+    ):
+        return [pb2]
+    if isinstance(pb1, REFLECTION_RESPONSE) and isinstance(
+        pb2, REFLECTION_REQUEST
+    ):
+        return [pb1]
+
+    return matches
+
+
 def parse_pb(pb_bytes):
     """Parse a serialized protobuf and display with message name.
 
@@ -74,6 +113,7 @@ def parse_pb(pb_bytes):
         if pb is not None:
             matches.append(pb)
 
+    matches = _parse_pb_prune(matches)
     if len(matches) != 1:
         raise ValueError(
             "Serialized protobuf could not be matched to a message type",
@@ -112,6 +152,9 @@ def handle_data_payload(frame_payload, flags):
         raise NotImplementedError(
             "PADDED flag not currently supported for data"
         )
+
+    if frame_payload == b"":
+        return ""
 
     if frame_payload[:1] != b"\x00":
         raise NotImplementedError(

@@ -18,6 +18,7 @@ import threading
 import time
 
 import grpc
+import grpc_reflection.v1alpha.reflection
 
 import users_pb2
 import users_pb2_grpc
@@ -131,9 +132,20 @@ def wait_for_termination(server):
         server.stop(0)
 
 
+def enable_reflection(server):
+    service_names = (
+        users_pb2.DESCRIPTOR.services_by_name["Users"].full_name,
+        grpc_reflection.v1alpha.reflection.SERVICE_NAME,
+    )
+    grpc_reflection.v1alpha.reflection.enable_server_reflection(
+        service_names, server
+    )
+
+
 def serve(grpc_port):
     server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
     users_pb2_grpc.add_UsersServicer_to_server(UsersServicer(), server)
+    enable_reflection(server)
 
     server.add_insecure_port(f"[::]:{grpc_port}")
     print(f"Running Users service on port {grpc_port}")
