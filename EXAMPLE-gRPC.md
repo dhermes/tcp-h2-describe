@@ -18,6 +18,16 @@ Starting tcp-h2-describe proxy server on port 24909
 ...
 ```
 
+Rather than using `python -m tcp_h2_describe` directly, we use a custom
+`grpc_proxy.py` that first calls
+
+```python
+tcp_h2_describe.register_payload_handler("DATA", handle_data_payload)
+```
+
+to register a custom handler that has access to the the protobuf definitions
+in our application.
+
 If we hit the proxy directly by using the **proxy's** `GRPC_PORT` with
 `call_grpc.py`:
 
