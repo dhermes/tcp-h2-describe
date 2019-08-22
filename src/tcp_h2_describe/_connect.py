@@ -33,7 +33,7 @@ def redirect_socket(recv_socket, send_socket, description, expect_preface):
             with the client connection preface. This should only be
             :data:`True` on the **first** TCP frame for the client socket.
     """
-    tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket)
+    tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket, send_socket)
     while tcp_chunk != b"":
         # Describe the chunk that was just encountered
         message = tcp_h2_describe._describe.describe(
@@ -45,11 +45,12 @@ def redirect_socket(recv_socket, send_socket, description, expect_preface):
 
         tcp_h2_describe._buffer.send(send_socket, tcp_chunk)
         # Read the next chunk from the socket.
-        tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket)
+        tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket, send_socket)
 
     tcp_h2_describe._display.display(
         f"Done redirecting socket for {description}"
     )
+    recv_socket.close()
 
 
 def connect_socket_pair(client_socket, client_addr, server_host, server_port):
@@ -91,6 +92,3 @@ def connect_socket_pair(client_socket, client_addr, server_host, server_port):
 
     t_read.join()
     t_write.join()
-
-    client_socket.close()
-    server_socket.close()

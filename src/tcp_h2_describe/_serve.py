@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import select
 import socket
 import threading
 
@@ -20,6 +21,34 @@ import tcp_h2_describe._display
 PROXY_HOST = "0.0.0.0"
 DEFAULT_SERVER_HOST = "localhost"
 BACKLOG = 5
+
+
+def accept(non_blocking_socket):
+    """Accept a connection on a non-blocking socket.
+
+    Since the socket is non-blocking, a **blocking** call to
+    ``select.select()`` is used to wait until the socket is ready.
+
+    Args:
+        non_blocking_socket (socket.socket): A socket that will block to accept
+            a connection.
+
+    Returns:
+       Tuple[socket.socket, str]: A pair of:
+       * The socket of the client connection that was accepted
+       * The address (IP and port) of the client socket
+
+    Raises:
+        ValueError: If ``non_blocking_socket`` is not readable after
+            ``select.select()`` returns.
+    """
+    readable, _, _ = select.select([non_blocking_socket], [], [])
+    if readable != [non_blocking_socket]:
+        raise ValueError("Socket not ready to accept connections")
+
+    client_socket, (ip_addr, port) = non_blocking_socket.accept()
+    client_addr = f"{ip_addr}:{port}"
+    return client_socket, client_addr
 
 
 def serve_proxy(proxy_port, server_port, server_host=DEFAULT_SERVER_HOST):
@@ -37,6 +66,7 @@ def serve_proxy(proxy_port, server_port, server_host=DEFAULT_SERVER_HOST):
             ``localhost``.
     """
     proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    proxy_socket.setblocking(0)
     proxy_socket.bind((PROXY_HOST, proxy_port))
     proxy_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     proxy_socket.listen(BACKLOG)
@@ -46,8 +76,7 @@ def serve_proxy(proxy_port, server_port, server_host=DEFAULT_SERVER_HOST):
     )
 
     while True:
-        client_socket, (ip_addr, port) = proxy_socket.accept()
-        client_addr = f"{ip_addr}:{port}"
+        client_socket, client_addr = accept(proxy_socket)
         tcp_h2_describe._display.display(
             f"Accepted connection from {client_addr}"
         )

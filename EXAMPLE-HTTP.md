@@ -136,6 +136,7 @@ Hexdump (Frame Payload) =
    20 22 3a 70 61 74 68 22 3a 20 22 2f 22 7d
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:59600)->proxy->server(localhost:8080)
+Done redirecting socket for server(localhost:8080)->proxy->client(127.0.0.1:59600)
 ```
 
 [1]: https://python-hyper.org/projects/h2/en/stable/basic-usage.html

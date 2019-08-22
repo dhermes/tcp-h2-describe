@@ -435,6 +435,7 @@ Hexdump (Compressed Headers) =
    bf 0f 2f 00
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:51600)->proxy->server(localhost:38895)
+Done redirecting socket for server(localhost:38895)->proxy->client(127.0.0.1:51600)
 ```
 
 If instead, we invoke some of these routes via [`grpcurl`][1]
@@ -669,6 +670,7 @@ Hexdump (Compressed Headers) =
    0c 67 72 70 63 2d 6d 65 73 73 61 67 65 00
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:52083)->proxy->server(localhost:38895)
+Done redirecting socket for server(localhost:38895)->proxy->client(127.0.0.1:52083)
 Accepted connection from 127.0.0.1:52088
 ============================================================
 client(127.0.0.1:52088)->proxy->server(localhost:38895)
@@ -971,6 +973,7 @@ Hexdump (Compressed Headers) =
    0c 67 72 70 63 2d 6d 65 73 73 61 67 65 00
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:52088)->proxy->server(localhost:38895)
+Done redirecting socket for server(localhost:38895)->proxy->client(127.0.0.1:52088)
 Accepted connection from 127.0.0.1:52093
 ============================================================
 client(127.0.0.1:52093)->proxy->server(localhost:38895)
@@ -1271,6 +1274,7 @@ Hexdump (Compressed Headers) =
    0c 67 72 70 63 2d 6d 65 73 73 61 67 65 00
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:52093)->proxy->server(localhost:38895)
+Done redirecting socket for server(localhost:38895)->proxy->client(127.0.0.1:52093)
 Accepted connection from 127.0.0.1:52101
 ============================================================
 client(127.0.0.1:52101)->proxy->server(localhost:38895)
@@ -1670,6 +1674,7 @@ Hexdump (Compressed Headers) =
    bf 0f 2f 00
 ----------------------------------------
 Done redirecting socket for client(127.0.0.1:52101)->proxy->server(localhost:38895)
+Done redirecting socket for server(localhost:38895)->proxy->client(127.0.0.1:52101)
 ```
 
 [1]: https://github.com/fullstorydev/grpcurl

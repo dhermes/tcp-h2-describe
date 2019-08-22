@@ -10,9 +10,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import select
 
-def recv(recv_socket, buffer_size=0x10000):
+
+SELECT_TIMEOUT = 0.05
+
+
+def is_closed(socket_):
+    """Determine if a socket is closed.
+
+    This uses the associated file descriptor as a proxy for "closed".
+
+    Args:
+        socket_ (socket.socket): The socket to check.
+
+    Returns:
+        bool: Indicates if closed or open.
+    """
+    return socket_.fileno() == -1
+
+
+def recv(recv_socket, send_socket, buffer_size=0x10000):
     """Call ``recv()`` on a socket; with some extra checks.
+
+    This **assumes** ``recv_socket`` is non-blocking, so a **blocking** call to
+    ``select.select()`` with a timoeut is used to wait until the socket is
+    ready. Additionally, the ``send_socket`` is used to determine if the
+    connection has been closed.
 
     .. note::
 
@@ -28,15 +52,31 @@ def recv(recv_socket, buffer_size=0x10000):
 
     Args:
         recv_socket (socket.socket): A socket to RECV from.
+        send_socket (socket.socket): A socket connected (on the "other end") to
+            ``recv_socket``.
         buffer_size (Optional[int]): The size of the read.
 
     Returns:
         bytes: The chunk that was read from the TCP stream.
 
     Raises:
+        ValueError: If ``recv_socket`` is not readable after
+            ``select.select()`` returns.
         RuntimeError: If the TCP chunk returned is "full size" (i.e. has
             ``buffer_size`` bytes).
     """
+    while True:
+        readable, _, _ = select.select([recv_socket], [], [], SELECT_TIMEOUT)
+        if readable:
+            break
+        # Check if the "other end" of the socket is closed. If it is, we
+        # simulate an empty RECV.
+        if is_closed(send_socket):
+            return b""
+
+    if readable != [recv_socket]:
+        raise ValueError("Socket not ready to RECV")
+
     tcp_chunk = recv_socket.recv(buffer_size)
     if len(tcp_chunk) == buffer_size:
         raise RuntimeError(
