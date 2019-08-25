@@ -23,7 +23,7 @@ class Test_describe:
 
         with pytest.raises(RuntimeError) as exc_info:
             tcp_h2_describe._describe.describe(
-                h2_frames, connection_description, True
+                h2_frames, connection_description, True, None
             )
 
         expected_args = (
@@ -44,7 +44,7 @@ class Test_describe:
         connection_description = "client->server"
 
         message = tcp_h2_describe._describe.describe(
-            h2_frames, connection_description, True
+            h2_frames, connection_description, True, None
         )
         expected = "\n".join(
             [
@@ -86,7 +86,7 @@ class Test_describe:
         connection_description = "server->client"
 
         message = tcp_h2_describe._describe.describe(
-            h2_frames, connection_description, False
+            h2_frames, connection_description, False, None
         )
         expected = "\n".join(
             [
