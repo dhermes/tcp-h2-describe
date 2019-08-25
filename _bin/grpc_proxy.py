@@ -167,7 +167,8 @@ def handle_data_payload(frame_payload, flags):
 
     Raises:
         NotImplementedError: If ``flags`` has ``PADDED`` set.
-        NotImplementedError: If the first bytes is not ``\x00``.
+        NotImplementedError: If the first byte is ``\x01``.
+        ValueError: If the first byte is not ``\x00`` or ``\x01``.
         ValueError: If the length of ``frame_payload`` does not match the
             length prefix.
     """
@@ -179,10 +180,17 @@ def handle_data_payload(frame_payload, flags):
     if frame_payload == b"":
         return ""
 
-    if frame_payload[:1] != b"\x00":
-        raise NotImplementedError(
-            "Serialized protobuf over gRPC only supported with tag 0",
-            frame_payload,
+    # See: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+    is_compressed = frame_payload[:1]
+    if is_compressed != b"\x00":
+        if is_compressed == b"\x01":
+            raise NotImplementedError(
+                "Protobuf over gRPC only supported without compression",
+                frame_payload,
+            )
+
+        raise ValueError(
+            "Unexpected compressed flag for gRPC", is_compressed, frame_payload
         )
 
     # NOTE: This will fail if ``frame_payload`` has fewer than 5 bytes.
@@ -195,7 +203,7 @@ def handle_data_payload(frame_payload, flags):
 
     pb_bytes = frame_payload[5:]
     parts = [
-        "gRPC Tag = 0 (00)",
+        "gRPC Compressed Flag = 0 (00)",
         f"Protobuf Length = {length} ({length_bytes})",
     ]
     if length == 0:
