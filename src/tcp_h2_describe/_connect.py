@@ -77,6 +77,8 @@ def connect_socket_pair(client_socket, client_addr, server_host, server_port):
         server_port (int): A port number for a running "server" process.
     """
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # See: https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
+    server_socket.setblocking(0)
     server_socket.connect((server_host, server_port))
 
     server_addr = f"{server_host}:{server_port}"

@@ -47,6 +47,8 @@ def accept(non_blocking_socket):
         raise ValueError("Socket not ready to accept connections")
 
     client_socket, (ip_addr, port) = non_blocking_socket.accept()
+    # See: https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
+    client_socket.setblocking(0)
     client_addr = f"{ip_addr}:{port}"
     return client_socket, client_addr
 
