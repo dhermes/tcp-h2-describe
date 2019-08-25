@@ -30,6 +30,36 @@ def is_closed(socket_):
     return socket_.fileno() == -1
 
 
+def wait_readable(recv_socket, send_socket):
+    """Wait until a non-blocking socket is readable.
+
+    Args:
+        recv_socket (socket.socket): A socket to RECV from.
+        send_socket (socket.socket): A socket connected (on the "other end") to
+            ``recv_socket``.
+
+    Returns:
+        Optional[socket.socket]: Either ``recv_socket`` if the connection is
+        still open or :data:`None`.
+
+    Raises:
+        ValueError: If ``recv_socket`` is not readable after
+            ``select.select()`` returns.
+    """
+    while True:
+        readable, _, _ = select.select([recv_socket], [], [], SELECT_TIMEOUT)
+        if readable:
+            break
+        # If the "other end" of the socket is closed, ``recv_socket`` is done.
+        if is_closed(send_socket):
+            return None
+
+    if readable != [recv_socket]:
+        raise ValueError("Socket not ready to RECV")
+
+    return recv_socket
+
+
 def recv(recv_socket, send_socket, buffer_size=0x10000):
     """Call ``recv()`` on a socket; with some extra checks.
 
@@ -60,22 +90,14 @@ def recv(recv_socket, send_socket, buffer_size=0x10000):
         bytes: The chunk that was read from the TCP stream.
 
     Raises:
-        ValueError: If ``recv_socket`` is not readable after
-            ``select.select()`` returns.
         RuntimeError: If the TCP chunk returned is "full size" (i.e. has
             ``buffer_size`` bytes).
     """
-    while True:
-        readable, _, _ = select.select([recv_socket], [], [], SELECT_TIMEOUT)
-        if readable:
-            break
-        # Check if the "other end" of the socket is closed. If it is, we
+    recv_socket = wait_readable(recv_socket, send_socket)
+    if recv_socket is None:
+        # Indicates the "other end" of the socket is closed, so we
         # simulate an empty RECV.
-        if is_closed(send_socket):
-            return b""
-
-    if readable != [recv_socket]:
-        raise ValueError("Socket not ready to RECV")
+        return b""
 
     tcp_chunk = recv_socket.recv(buffer_size)
     if len(tcp_chunk) == buffer_size:
