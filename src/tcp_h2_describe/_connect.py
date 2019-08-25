@@ -18,7 +18,7 @@ import tcp_h2_describe._describe
 import tcp_h2_describe._display
 
 
-def redirect_socket(recv_socket, send_socket, description, expect_preface):
+def redirect_socket(recv_socket, send_socket, description, is_client):
     """Redirect a TCP stream from one socket to another.
 
     This only redirects in **one** direction, i.e. it RECVs from
@@ -29,10 +29,14 @@ def redirect_socket(recv_socket, send_socket, description, expect_preface):
         send_socket (socket.socket): The socket that will be SENT to.
         description (str): A description of the RECV->SEND relationship for
             this socket pair.
-        expect_preface (bool): Indicates if the ``h2_frames`` should begin
-            with the client connection preface. This should only be
-            :data:`True` on the **first** TCP frame for the client socket.
+        is_client (bool): Indicates if the ``recv_socket`` is a client socket.
+            For a client socket, the connection **should** begin with the
+            client connection preface.
     """
+    expect_preface = False
+    if is_client:
+        expect_preface = True
+
     tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket, send_socket)
     while tcp_chunk != b"":
         # Describe the chunk that was just encountered
