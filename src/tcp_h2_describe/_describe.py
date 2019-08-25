@@ -399,10 +399,11 @@ def next_h2_frame(h2_frames):
     return parts, h2_frames[9 + frame_length :]
 
 
-def describe(h2_frames, connection_description, expect_preface):
+def describe(h2_frames, connection_description, expect_preface, proxy_line):
     """Describe an HTTP/2 frame.
 
     .. connection header spec: https://http2.github.io/http2-spec/#ConnectionHeader
+    .. proxy protocol: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-proxy-protocol.html
 
     Args:
         h2_frames (bytes): The raw bytes of a TCP frame containing HTTP/2
@@ -413,6 +414,8 @@ def describe(h2_frames, connection_description, expect_preface):
             with the client connection preface. This should only be
             :data:`True` on the **first** TCP frame for the client socket.
             See `connection header spec`_.
+        proxy_line (Optional[bytes]): An optional `proxy protocol`_ line parsed
+           from the first frame.
 
     Returns:
         str: The description of ``h2_frames``, expected to be printed by the
@@ -423,6 +426,16 @@ def describe(h2_frames, connection_description, expect_preface):
             does not begin with the client connection preface.
     """
     parts = [HEADER, connection_description, ""]
+    if proxy_line is not None:
+        parts.extend(
+            [
+                "Proxy Protocol Header =",
+                f"   {proxy_line}",
+                "Hexdump (Proxy Protocol Header) =",
+                textwrap.indent(simple_hexdump(proxy_line), "   "),
+                FOOTER,
+            ]
+        )
 
     if expect_preface:
         if not h2_frames.startswith(PREFACE):

@@ -16,6 +16,7 @@ import threading
 import tcp_h2_describe._buffer
 import tcp_h2_describe._describe
 import tcp_h2_describe._display
+import tcp_h2_describe._proxy_protocol
 
 
 def redirect_socket(recv_socket, send_socket, description, is_client):
@@ -30,22 +31,29 @@ def redirect_socket(recv_socket, send_socket, description, is_client):
         description (str): A description of the RECV->SEND relationship for
             this socket pair.
         is_client (bool): Indicates if the ``recv_socket`` is a client socket.
-            For a client socket, the connection **should** begin with the
-            client connection preface.
+            For a client socket, the connection **may** begin with a proxy
+            protocol line and **should** begin with the client connection
+            preface.
     """
     expect_preface = False
+    proxy_line = None
     if is_client:
         expect_preface = True
+        proxy_line = tcp_h2_describe._proxy_protocol.consume_proxy_line(
+            recv_socket, send_socket
+        )
 
     tcp_chunk = tcp_h2_describe._buffer.recv(recv_socket, send_socket)
     while tcp_chunk != b"":
         # Describe the chunk that was just encountered
         message = tcp_h2_describe._describe.describe(
-            tcp_chunk, description, expect_preface
+            tcp_chunk, description, expect_preface, proxy_line
         )
         tcp_h2_describe._display.display(message)
-        # After the first usage, make sure ``expect_preface`` is not set.
+        # After the first usage, make sure ``expect_preface`` and
+        # ``proxy_line`` are not set.
         expect_preface = False
+        proxy_line = None
 
         tcp_h2_describe._buffer.send(send_socket, tcp_chunk)
         # Read the next chunk from the socket.

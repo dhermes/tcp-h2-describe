@@ -73,6 +73,7 @@ server_thread.start()
 ```
 
 See example output when proxying an [HTTP server][3] and a [gRPC server][4].
+Additionally, the `tcp-h2-describe` proxy supports the [proxy protocol][5].
 
 ## Development
 
@@ -88,3 +89,4 @@ details, see the [LICENSE][2].
 [2]: https://github.com/dhermes/tcp-h2-describe/blob/master/LICENSE
 [3]: https://github.com/dhermes/tcp-h2-describe/blob/master/EXAMPLE-HTTP.md
 [4]: https://github.com/dhermes/tcp-h2-describe/blob/master/EXAMPLE-gRPC.md
+[5]: https://github.com/dhermes/tcp-h2-describe/blob/master/EXAMPLE-PROXY-PROTOCOL.md
