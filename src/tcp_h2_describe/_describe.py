@@ -175,9 +175,10 @@ def default_payload_handler(frame_payload, unused_flags):
         unused_flags (int): The flags for the frame payload.
 
     Returns:
-        str: The frame payload returned as-is with a prefix.
+        str: Either an empty string (if the frame payload is empty) or a
+        pretty printed version of the payload along with a hexdump.
     """
-    if frame_payload == "":
+    if frame_payload == b"":
         return ""
 
     return "\n".join(
