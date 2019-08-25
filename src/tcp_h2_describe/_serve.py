@@ -16,11 +16,13 @@ import threading
 
 import tcp_h2_describe._connect
 import tcp_h2_describe._display
+import tcp_h2_describe._keepalive
 
 
 PROXY_HOST = "0.0.0.0"
 DEFAULT_SERVER_HOST = "localhost"
 BACKLOG = 5
+KEEP_ALIVE_INTERVAL = 180  # 3 minutes, in seconds
 
 
 def accept(non_blocking_socket):
@@ -49,6 +51,11 @@ def accept(non_blocking_socket):
     client_socket, (ip_addr, port) = non_blocking_socket.accept()
     # See: https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
     client_socket.setblocking(0)
+    # Turn on KEEPALIVE for the connection.
+    tcp_h2_describe._keepalive.set_keepalive(
+        client_socket, KEEP_ALIVE_INTERVAL
+    )
+
     client_addr = f"{ip_addr}:{port}"
     return client_socket, client_addr
 
