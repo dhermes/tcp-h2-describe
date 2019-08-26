@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import errno
 import socket
 import threading
 
@@ -85,7 +86,12 @@ def connect_socket_pair(client_socket, client_addr, server_host, server_port):
         server_port (int): A port number for a running "server" process.
     """
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.connect((server_host, server_port))
+    # See: https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
+    server_socket.setblocking(0)
+    indicator = server_socket.connect_ex((server_host, server_port))
+    if indicator not in (0, errno.EINPROGRESS):
+        err_name = errno.errorcode.get(indicator, "UNKNOWN")
+        raise BlockingIOError(indicator, f"Error: {err_name}")
 
     server_addr = f"{server_host}:{server_port}"
     read_description = f"client({client_addr})->proxy->server({server_addr})"
