@@ -1,7 +1,7 @@
 # Example With Proxy Protocol
 
 When raw TCP traffic comes through a proxy (e.g. [Amazon's ELB][1]) a proxy
-protocol line will be added to the first TCP frame. For example
+protocol line will be added to the data from the first TCP packet. For example
 
 ```
 PROXY TCP4 198.51.100.22 203.0.113.7 35646 80

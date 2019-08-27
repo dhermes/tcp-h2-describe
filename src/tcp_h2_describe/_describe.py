@@ -21,6 +21,9 @@ PREFACE_PRETTY = r"""Client Connection Preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\
 Hexdump (Client Connection Preface) =
    50 52 49 20 2a 20 48 54 54 50 2f 32 2e 30 0d 0a
    0d 0a 53 4d 0d 0a 0d 0a"""
+MISSING_PREFACE = (
+    "Expected TCP packet data to begin with client connection preface"
+)
 HEADER = "=" * 60
 FOOTER = "-" * 40
 STRUCT_H = struct.Struct(">H")
@@ -340,13 +343,13 @@ def handle_window_update_payload(frame_payload, unused_flags):
 
 
 def next_h2_frame(h2_frames):
-    """Parse the next HTTP/2 frame from a partially parsed TCP frame.
+    """Parse the next HTTP/2 frame from partially parsed TCP packet data.
 
     .. frame header spec: https://http2.github.io/http2-spec/#FrameHeader
 
     Args:
         h2_frames (bytes): The remaining unparsed HTTP/2 frames (as raw bytes)
-            from TCP frame sent via TCP.
+            from TCP packet data.
 
     Returns:
         Tuple[List[str], bytes]: A pair of
@@ -406,14 +409,14 @@ def describe(h2_frames, connection_description, expect_preface, proxy_line):
     .. proxy protocol: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-proxy-protocol.html
 
     Args:
-        h2_frames (bytes): The raw bytes of a TCP frame containing HTTP/2
-            frames that have been sent via TCP.
+        h2_frames (bytes): The raw bytes of TCP packet data containing HTTP/2
+            frames.
         connection_description (str): A description of the RECV->SEND
             relationship for a socket pair.
         expect_preface (bool): Indicates if the ``h2_frames`` should begin
             with the client connection preface. This should only be
-            :data:`True` on the **first** TCP frame for the client socket.
-            See `connection header spec`_.
+            :data:`True` on the data from the **first** TCP packet for the
+            client socket. See `connection header spec`_.
         proxy_line (Optional[bytes]): An optional `proxy protocol`_ line parsed
            from the first frame.
 
@@ -439,10 +442,7 @@ def describe(h2_frames, connection_description, expect_preface, proxy_line):
 
     if expect_preface:
         if not h2_frames.startswith(PREFACE):
-            raise RuntimeError(
-                "Expected TCP frame to begin with client connection preface",
-                h2_frames,
-            )
+            raise RuntimeError(MISSING_PREFACE, h2_frames)
 
         parts.extend([PREFACE_PRETTY, FOOTER])
         h2_frames = h2_frames[len(PREFACE) :]

@@ -26,10 +26,7 @@ class Test_describe:
                 h2_frames, connection_description, True, None
             )
 
-        expected_args = (
-            "Expected TCP frame to begin with client connection preface",
-            h2_frames,
-        )
+        expected_args = (tcp_h2_describe._describe.MISSING_PREFACE, h2_frames)
         assert exc_info.value.args == expected_args
 
     @staticmethod

@@ -129,7 +129,7 @@ def read_next_byte(recv_socket, send_socket):
 
 
 def consume_proxy_line(recv_socket, send_socket):
-    """(Maybe) consume the proxy protocol (first) line of a TCP frame.
+    """(Maybe) consume the proxy protocol (first) line of TCP packet data.
 
     .. proxy protocol: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-proxy-protocol.html
 
@@ -146,14 +146,14 @@ def consume_proxy_line(recv_socket, send_socket):
 
     Returns:
         Optional[bytes]: The proxy protocol line (including the CRLF) if the
-        first line of the TCP frame begins with ``PROXY ...``, otherwise
+        first line of TCP packet data begins with ``PROXY ...``, otherwise
         :data:`None`.
 
     Raises:
         RuntimeError: If ``wait_readable`` returns :data:`None`; this
             indicates that the ``send_socket`` is closed.
         ValueError: If the character immediately preceding the newline is not
-            a carriage return (TCP lines are CRLF delimited).
+            a carriage return (lines from TCP packet data are CRLF delimited).
         ValueError: If the proxy protocol line does not have 6
             (space-delimited) parts.
     """
